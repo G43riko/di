@@ -1,8 +1,10 @@
 import { setCurrentInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
 import {
+    type CustomProvider,
     getTokenFromProvider,
     isCustomProvider,
+    isType,
     type ProviderToken,
     type ProviderType,
     StringifyProviderToken,
@@ -21,9 +23,13 @@ export interface Injector {
 }
 
 interface InjectorHolder<T> {
-    readonly type: Type<T>;
+    readonly type: ProviderType<T>;
+    readonly token: ProviderToken;
     readonly resolution?: TypeResolution<T>;
 }
+type MapArray<T extends readonly ProviderToken[]> = {
+    [K in keyof T]: T[K] extends Type<infer H> ? H : T[K];
+  };
 export class SimpleInjector implements Injector {
     protected readonly _holders: Map<ProviderToken<unknown>, InjectorHolder<unknown>> = new Map();
 
@@ -43,19 +49,16 @@ export class SimpleInjector implements Injector {
 
     public registerProvider<T>(provider: ProviderType<T>): void {
         const token = getTokenFromProvider(provider);
-        if (isCustomProvider(provider)) {
-            throw new Error("Not implemented");
-        }
-
         if (this._holders.has(token)) {
             throw new Error(Errors.CANNOT_REGISTER_MULTIPLE_TIMES(token));
         }
         this._holders.set(token, {
+            token,
             type: provider,
         });
     }
 
-    private createInstance<T>(type: Type<unknown>, params?: readonly unknown[]): TypeResolution<T> {
+    private createClassInstance<T>(type: Type<unknown>, params?: readonly unknown[]): TypeResolution<T> {
         const prevInjector = setCurrentInjector(this);
         try {
             if (params) {
@@ -67,24 +70,52 @@ export class SimpleInjector implements Injector {
             setCurrentInjector(prevInjector);
         }
     }
-    protected resolve<T>(token: ProviderToken<T>): TypeResolution<T> {
-        const parameters = Reflect.getMetadata("design:paramtypes", token);
-        const data = this._holders.get(token);
-
-        if (!data) {
-            throw new Error(Errors.CANNOT_FIND_TOKEN(token));
+    protected resolveCustomProvider<T>(provider: CustomProvider<T>): TypeResolution<T> {
+        if("useValue" in provider) {
+            return provider.useValue as TypeResolution<T>;
         }
+        if("useClass" in provider) {
+            return this.resolveTypeProvider(provider.useClass)
+        }
+
+        if("factory" in provider) {
+            if(provider.deps?.length) {
+                return provider.factory(
+                    ...this.resolveParameters(provider.deps)
+                )
+            }
+            return provider.factory();
+
+        }
+        throw new Error(`Cannot resolve custom provider ${JSON.stringify(provider)}`);
+    }
+
+    private resolveParameters<T extends readonly ProviderToken[]>(parameters: T): MapArray<T> {
+        return parameters.map((parameter: ProviderToken) => this.get(parameter)) as MapArray<T>
+    }
+    private resolveTypeProvider<T>(type: Type<T>): T {
+        const parameters = Reflect.getMetadata("design:paramtypes", type);
         if (!parameters) {
-            return this.createInstance<T>(data.type);
+            return this.createClassInstance<T>(type);
         }
 
-        const resolvedParams = parameters.map((parameter: ProviderToken) => this.get(parameter));
+        const resolvedParams = this.resolveParameters(parameters);
 
         if (resolvedParams.some((e: TypeResolution) => typeof e === "undefined")) {
-            throw new Error(Errors.CANNOT_RESOLVE_PARAMS(token, resolvedParams));
+            throw new Error(Errors.CANNOT_RESOLVE_PARAMS(type, resolvedParams));
         }
 
-        return this.createInstance<T>(data.type, resolvedParams);
+        return this.createClassInstance<T>(type, resolvedParams);
+    }
+    private resolveToken<T>(data: InjectorHolder<T>): TypeResolution<T> {
+        if(isType(data.type)) {
+            return this.resolveTypeProvider<T>(data.type);
+        }
+        if(isCustomProvider(data.type)) {
+            return this.resolveCustomProvider(data.type);
+        }
+
+        throw new Error(`Invalid type '${data.type}'`)
     }
 
     public require<T>(token: ProviderToken<T>): TypeResolution<T> {
@@ -137,10 +168,11 @@ export class SimpleInjector implements Injector {
             return holder.resolution;
         }
 
-        const newResolution = this.resolve(token);
+        const newResolution = this.resolveToken(holder);
 
         // TODO: save resolution only if it is global
         const newHolder = {
+            token,
             type: holder.type,
             resolution: newResolution,
         };

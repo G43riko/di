@@ -1,1 +1,4 @@
-# di
+# Dependency injection
+
+## TODO:
+ - [ ] async injector

@@ -19,12 +19,24 @@ export function getTokenFromProvider<T>(provider: ProviderType<T>): ProviderToke
 }
 export type ProviderType<T = any> = Type<T> | CustomProvider<T>;
 export type ProviderToken<T = any> = Type<T> | string;
-export interface CustomProvider<T = any> {
-    token: ProviderToken;
-    useValue?: T;
-    useClass?: T;
-    factory?: () => T;
+interface CoreCustomProvider<T = any> {
+    readonly token: ProviderToken;
 }
+interface ValueCustomProvider<T = any> extends CoreCustomProvider<T>{
+    readonly useValue: T;
+}
+interface ClassCustomProvider<T = any> extends CoreCustomProvider<T>{
+    readonly useClass: Type<T>;
+}
+
+interface FactoryCustomProvider<T = any> extends CoreCustomProvider<T>{
+    readonly factory: (...params: any[]) => T;
+    readonly deps?: readonly ProviderToken[];
+}
+export type CustomProvider<T = any> = 
+ | ValueCustomProvider<T> 
+ | ClassCustomProvider<T>
+ | FactoryCustomProvider<T>
 
 export function StringifyProviderToken<T>(type: ProviderToken<T>): string {
     if (isType(type)) {
@@ -35,10 +47,4 @@ export function StringifyProviderToken<T>(type: ProviderToken<T>): string {
 export function isCustomProvider(param: ProviderType): param is CustomProvider {
     const type = typeof (param as any).token;
     return type === "string" || type === "function";
-}
-
-export function checkCustomProvider(customProvider: CustomProvider): void {
-    if (!customProvider.factory && !customProvider.useClass && !customProvider.useValue) {
-        throw new Error("Custom provider must have one of factory, useClass, useValue");
-    }
 }
