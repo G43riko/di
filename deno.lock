@@ -6,6 +6,7 @@
     "jsr:@g43/math@^0.0.5": "0.0.5",
     "jsr:@g43/tools@^0.0.14": "0.0.14",
     "jsr:@g43/types@^0.0.5": "0.0.5",
+    "jsr:@g43/types@^0.0.7": "0.0.7",
     "jsr:@g43/utils@^0.0.14": "0.0.14",
     "jsr:@std/assert@^1.0.12": "1.0.12",
     "jsr:@std/assert@^1.0.8": "1.0.12",
@@ -36,7 +37,7 @@
     "@g43/math@0.0.5": {
       "integrity": "18b578a6ddaa4f8eb6ec4be97af834f046aca65e25b355b9d574c8728f043725",
       "dependencies": [
-        "jsr:@g43/types"
+        "jsr:@g43/types@^0.0.5"
       ]
     },
     "@g43/tools@0.0.14": {
@@ -44,17 +45,22 @@
       "dependencies": [
         "jsr:@g43/core",
         "jsr:@g43/math",
+        "jsr:@g43/types@^0.0.7",
         "jsr:@g43/utils"
       ]
     },
     "@g43/types@0.0.5": {
       "integrity": "b166e3ca30e50d27062fc5be81ec33e92c2f1bc22ebe0149530f96fe0105e38f"
     },
+    "@g43/types@0.0.7": {
+      "integrity": "9863f6839d7abbfa12679235c5f03443d17fd33f125ce093a46f5e655c270274"
+    },
     "@g43/utils@0.0.14": {
       "integrity": "28ccb360ddbf0847d0fed4b35f7780bae43cba62a3ad26a9b86060244fb037a7",
       "dependencies": [
         "jsr:@g43/enums",
-        "jsr:@g43/math"
+        "jsr:@g43/math",
+        "jsr:@g43/types@^0.0.7"
       ]
     },
     "@std/assert@1.0.12": {

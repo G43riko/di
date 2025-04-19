@@ -1,14 +1,6 @@
-import { Injector } from "./injector.ts";
-import { ProviderToken, Type } from "./types.ts";
-
-export type InjectionToken<T> = {
-    readonly _type: T;
-    readonly name: string;
-}
-export function createInjectionToken<T = any>(name: string): InjectionToken<T> {
-    return {name} as InjectionToken<T>
-}
-
+import { InjectionToken } from "./injection-token.ts";
+import type { Injector } from "./injector.ts";
+import type { ProviderToken, Type } from "./types.ts";
 
 interface ProvidedValue<T> {
     readonly type: "ValueProvider",
@@ -57,7 +49,7 @@ function createResolvableProvider<T>(token: InjectionToken<T>, valueOrProvider: 
     }
 }
 
-const tokenTest = createInjectionToken<{name: string}>("PERSON");
+const tokenTest = new InjectionToken<{name: string}>("PERSON");
 class ValueA {
 
 }
@@ -67,7 +59,7 @@ class ValueB extends ValueA{
 class ValueC{
 
 }
-const tokenValueA = createInjectionToken<ValueA>("Value_A");
+const tokenValueA = new InjectionToken<ValueA>("Value_A");
 
 createResolvableProvider(tokenValueA, ProvideClass(ValueA));
 createResolvableProvider(tokenValueA, ProvideClass(ValueB));

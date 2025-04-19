@@ -16,11 +16,14 @@ export interface CreateInjectorParams {
     readonly allowUnresolved?: boolean;
 }
 
-export function createInjector(params: CreateInjectorParams): Injector {
-    const parentInjector = params.parentInjector ?? RootInjector;
+export function createInjector({
+    providers = [],
+    parentInjector = RootInjector,
+    ...params
+}: CreateInjectorParams): Injector {
     const injector = new SimpleInjector(parentInjector, params.name);
 
-    params.providers.forEach((provider) => injector.registerProvider(provider));
+    providers.forEach((provider) => injector.registerProvider(provider));
 
     if (params.instantiateImmediately) {
         injector.resolveAll(params.allowUnresolved);

@@ -1,6 +1,7 @@
 import { isGlobalInjectable } from "./injectable.holder.ts";
+import { InjectionToken } from "./injection-token.ts";
 import { type Injector, SimpleInjector } from "./injector.ts";
-import { isType, type ProviderToken, type TypeResolution } from "./types.ts";
+import { isType, StringifyProviderToken, type ProviderToken, type TypeResolution } from "./types.ts";
 
 class RootInjectorClass extends SimpleInjector {
     public constructor() {
@@ -19,12 +20,19 @@ class RootInjectorClass extends SimpleInjector {
             if (isGlobal) {
                 this.registerProvider(token);
 
-                return super.get(token);
+                return super.get(token, true);
             } else {
                 // we are in get method so we just return undefined
                 return;
             }
         }
+        if(token instanceof InjectionToken) {
+            if(token.options.required) {
+                throw new Error(`${token} is required but not found`);
+            }
+            return undefined
+        }
+
         throw new Error("Not implemented");
     }
 }
