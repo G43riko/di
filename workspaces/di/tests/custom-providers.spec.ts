@@ -2,7 +2,7 @@ import { describe, it } from "@std/testing/bdd";
 import { createInjector } from "../src/create-injector.ts";
 import { Injectable } from "../src/injectable.decorator.ts";
 import { expect } from "@std/expect";
-import { SimpleInjector } from "../src/injector.ts";
+import type { SimpleInjector } from "../src/injector.ts";
 
 @Injectable()
 class DepA {

@@ -22,7 +22,7 @@ export interface Injector {
     runAsync<T>(callback: () => Promise<T>): Promise<T>;
 }
 
-interface InjectorHolder<T> {
+interface InjectorEntry<T> {
     readonly type: ProviderType<T>;
     readonly token: ProviderToken;
     readonly resolution?: TypeResolution<T>;
@@ -30,14 +30,24 @@ interface InjectorHolder<T> {
 type MapArray<T extends readonly ProviderToken[]> = {
     [K in keyof T]: T[K] extends Type<infer H> ? H : T[K];
   };
-export class SimpleInjector implements Injector {
-    protected readonly _holders: Map<ProviderToken<unknown>, InjectorHolder<unknown>> = new Map();
+
+abstract class AbstractInjector implements Injector {
+    protected readonly _holders: Map<ProviderToken<unknown>, InjectorEntry<unknown>> = new Map();
 
     public constructor(
         protected readonly parent?: Injector,
         protected readonly name?: string,
     ) {
     }
+
+    public abstract get<T>(type: ProviderToken<T>): TypeResolution<T> | undefined;
+    public abstract require<T>(type: ProviderToken<T>): TypeResolution<T>;
+
+    public abstract printDebug(): void;
+    public abstract run<T>(callback: () => T): T;
+    public abstract runAsync<T>(callback: () => Promise<T>): Promise<T>;
+}
+export class SimpleInjector extends AbstractInjector {
 
     public resolveAll(allowUnresolved = false): void {
         if (allowUnresolved) {
@@ -70,7 +80,7 @@ export class SimpleInjector implements Injector {
             setCurrentInjector(prevInjector);
         }
     }
-    protected resolveCustomProvider<T>(provider: CustomProvider<T>): TypeResolution<T> {
+    private resolveCustomProvider<T>(provider: CustomProvider<T>): TypeResolution<T> {
         if("useValue" in provider) {
             return provider.useValue as TypeResolution<T>;
         }
@@ -107,7 +117,7 @@ export class SimpleInjector implements Injector {
 
         return this.createClassInstance<T>(type, resolvedParams);
     }
-    private resolveToken<T>(data: InjectorHolder<T>): TypeResolution<T> {
+    private resolveToken<T>(data: InjectorEntry<T>): TypeResolution<T> {
         if(isType(data.type)) {
             return this.resolveTypeProvider<T>(data.type);
         }
@@ -154,7 +164,7 @@ export class SimpleInjector implements Injector {
         console.log(`Injector '${injectorName}' contains: ${JSON.stringify(stringityData, null, 4)}`);
     }
     public get<T>(token: ProviderToken<T>): TypeResolution<T> | undefined {
-        const holder = this._holders.get(token) as InjectorHolder<T>;
+        const holder = this._holders.get(token) as InjectorEntry<T>;
 
         if (!holder) {
             if (this.parent) {

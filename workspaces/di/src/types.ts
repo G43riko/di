@@ -1,3 +1,6 @@
+import { Injector } from "./injector.ts";
+import { RootInjector } from "./root-injector.ts";
+
 export function isType(v: any): v is Type<any> {
     return typeof v === "function";
 }
@@ -17,11 +20,14 @@ export function getTokenFromProvider<T>(provider: ProviderType<T>): ProviderToke
 
     return provider.token;
 }
+
 export type ProviderType<T = any> = Type<T> | CustomProvider<T>;
-export type ProviderToken<T = any> = Type<T> | string;
+export type ProviderToken<T = any> = Type<T> | string | InjectionToken<T>;
+
 interface CoreCustomProvider<T = any> {
     readonly token: ProviderToken;
 }
+
 interface ValueCustomProvider<T = any> extends CoreCustomProvider<T>{
     readonly useValue: T;
 }
