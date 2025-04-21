@@ -2,6 +2,7 @@ import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { Injectable } from "./injectable.decorator.ts";
 import { createInjector } from "./create-injector.ts";
+import { rootInjectorName } from "./config.ts";
 
 describe("createInjector", () => {
     @Injectable.local()
@@ -17,6 +18,9 @@ describe("createInjector", () => {
     @Injectable()
     class ServiceC {
     }
+    it("Should throw if injector with roots name is creating", () => {
+        expect(() => createInjector({ name: rootInjectorName })).toThrow();
+    });
     describe("create injector with valid service with no providers", () => {
         const injectorWithServiceA = createInjector({
             providers: [ServiceA],

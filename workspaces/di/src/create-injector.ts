@@ -1,8 +1,9 @@
-import { strictMode } from "./config.ts";
+import { rootInjectorName, strictMode } from "./config.ts";
 import { isGlobalProviderType } from "./injectable.holder.ts";
-import { type Injector, SimpleInjector } from "./injector.ts";
+import type { Injector } from "./injector.ts";
+import { SimpleInjector } from "./simple-injector.ts";
 import { RootInjector } from "./root-injector.ts";
-import { StringifyProviderType, type ProviderType } from "./types.ts";
+import { type ProviderType, StringifyProviderType } from "./types.ts";
 
 export interface CreateInjectorParams {
     readonly providers?: readonly ProviderType<unknown>[];
@@ -21,18 +22,28 @@ export interface CreateInjectorParams {
 export function createInjector({
     providers = [],
     parentInjector = RootInjector,
+    name,
     ...params
 }: CreateInjectorParams): Injector {
-    const injector = new SimpleInjector(parentInjector, params.name);
+    if (name === rootInjectorName) {
+        throw new Error(`Injector name '${rootInjectorName}' is reserver for root injector`);
+    }
+    const injector = new SimpleInjector(parentInjector, name);
 
-    if(strictMode) {
-        for(const provider of providers) {
-            if(isGlobalProviderType(provider)) {
+    if (strictMode) {
+        for (const provider of providers) {
+            if (isGlobalProviderType(provider)) {
                 throw new Error(`${injector} can't register global provider ${StringifyProviderType(provider)}`);
             }
         }
     }
-    providers.forEach((provider) => injector.registerProvider(provider));
+    providers.forEach((provider) => {
+        if (isGlobalProviderType(provider)) {
+            (RootInjector as SimpleInjector).registerProvider(provider);
+        } else {
+            injector.registerProvider(provider);
+        }
+    });
 
     if (params.instantiateImmediately) {
         injector.resolveAll(params.allowUnresolved);

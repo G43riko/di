@@ -1,11 +1,13 @@
+import { rootInjectorName } from "./config.ts";
 import { isGlobalProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
-import { type Injector, SimpleInjector } from "./injector.ts";
-import { isType, StringifyProviderToken, type ProviderToken, type TypeResolution } from "./types.ts";
+import type { Injector } from "./injector.ts";
+import { SimpleInjector } from "./simple-injector.ts";
+import { isType, type ProviderToken, type TypeResolution } from "./types.ts";
 
 class RootInjectorClass extends SimpleInjector {
     public constructor() {
-        super(undefined, "RootInjector");
+        super(undefined, rootInjectorName);
     }
 
     public override get<T>(token: ProviderToken<T>): TypeResolution<T> | undefined {
@@ -26,11 +28,11 @@ class RootInjectorClass extends SimpleInjector {
                 return;
             }
         }
-        if(token instanceof InjectionToken) {
-            if(token.options.required) {
+        if (token instanceof InjectionToken) {
+            if (token.options.required) {
                 throw new Error(`${token} is required but not found`);
             }
-            return undefined
+            return undefined;
         }
 
         throw new Error("Not implemented");

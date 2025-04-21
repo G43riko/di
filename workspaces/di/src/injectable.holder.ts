@@ -1,3 +1,4 @@
+import { defaultScope } from "./config.ts";
 import type { InjectableParams } from "./injectable.decorator.ts";
 import { assignProperty } from "./misc-utils.ts";
 import { Scope } from "./scope.ts";
@@ -18,20 +19,26 @@ const injectables: Map<any, InjectableHolder> = new Map();
 function getSymbol(typeOrInstance: any, symbol: typeof injectableDataSymbol): InjectableHolder | undefined {
     return typeOrInstance[symbol];
 }
-
-export function isGlobalProviderType<T>(token: ProviderType<T>): boolean {
+export function getScope(token: ProviderType): Scope {
     if (isType(token)) {
         const holder = getSymbol(token, injectableDataSymbol);
         if (holder) {
-            return holder.options.scope === Scope.GLOBAL;
+            return holder.options.scope;
         }
     }
 
-    if(isCustomProvider(token)) {
-        return token.scope === Scope.GLOBAL;
+    if (isCustomProvider(token) && token.scope) {
+        return token.scope;
     }
 
-    return false;
+    return defaultScope;
+}
+export function isTransientProviderType<T>(token: ProviderType<T>): boolean {
+    return getScope(token) === Scope.TRANSIENT;
+}
+
+export function isGlobalProviderType<T>(token: ProviderType<T>): boolean {
+    return getScope(token) === Scope.GLOBAL;
 }
 
 export function registerInjectable<T>(injectable: Type, options: InjectableOptions): void {

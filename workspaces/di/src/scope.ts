@@ -1,6 +1,6 @@
 export enum Scope {
     /**
-     * Global scope means that the service will be created once per application. 
+     * Global scope means that the service will be created once per application.
      * All injectors will share the same instance of the service.
      */
     GLOBAL = "global",

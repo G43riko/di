@@ -1,4 +1,3 @@
-
 export class InjectionToken<T> {
     public constructor(
         public readonly name: string,
@@ -7,8 +6,8 @@ export class InjectionToken<T> {
             /**
              * If true, injector.get(token) will throw if token is not found in injector
              */
-            readonly required?: boolean
-        } = {}
+            readonly required?: boolean;
+        } = {},
     ) {
     }
 

@@ -1,5 +1,5 @@
 import { InjectionToken } from "./injection-token.ts";
-import { Scope } from "./scope.ts";
+import type { Scope } from "./scope.ts";
 
 export function isType(v: any): v is Type<any> {
     return typeof v === "function";
@@ -29,35 +29,35 @@ interface CoreCustomProvider<T = any> {
     readonly scope?: Scope;
 }
 
-interface ValueCustomProvider<T = any> extends CoreCustomProvider<T>{
+interface ValueCustomProvider<T = any> extends CoreCustomProvider<T> {
     readonly useValue: T;
 }
-interface ClassCustomProvider<T = any> extends CoreCustomProvider<T>{
+interface ClassCustomProvider<T = any> extends CoreCustomProvider<T> {
     readonly useClass: Type<T>;
 }
 
-interface FactoryCustomProvider<T = any> extends CoreCustomProvider<T>{
+interface FactoryCustomProvider<T = any> extends CoreCustomProvider<T> {
     readonly scope?: Scope;
     readonly factory: (...params: any[]) => T;
     readonly deps?: readonly ProviderToken[];
 }
-export type CustomProvider<T = any> = 
- | ValueCustomProvider<T> 
- | ClassCustomProvider<T>
- | FactoryCustomProvider<T>
+export type CustomProvider<T = any> =
+    | ValueCustomProvider<T>
+    | ClassCustomProvider<T>
+    | FactoryCustomProvider<T>;
 
 export function StringifyProviderType<T>(type: ProviderType<T>): string {
     if (isType(type)) {
         return String(type.name);
     }
 
-    if("useValue" in type) {
+    if ("useValue" in type) {
         return String(`ValueProvider[${type.useValue}]`);
     }
-    if("useClass" in type) {
+    if ("useClass" in type) {
         return String(`ClassProvider[${type.useClass.name}]`);
     }
-    if("factory" in type) {
+    if ("factory" in type) {
         return String(`FactoryProvider[${type.factory}]`);
     }
 
@@ -68,13 +68,13 @@ export function StringifyProviderToken<T>(type: ProviderToken<T>): string {
     if (isType(type)) {
         return String(type.name);
     }
-    if(type instanceof InjectionToken) {
+    if (type instanceof InjectionToken) {
         return type.toString();
     }
     return String(type);
 }
 export function isCustomProvider(param: ProviderType): param is CustomProvider {
-    if("useValue" in param || "useClass" in param || "factory" in param) {
+    if ("useValue" in param || "useClass" in param || "factory" in param) {
         return true;
     }
     const type = typeof (param as any).token;
