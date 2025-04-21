@@ -16,7 +16,7 @@ A lightweight, powerful dependency injection library for Deno applications, insp
 
 ```ts
 // Import from deno.land
-import { Injectable, createInjector, inject } from "https://deno.land/x/di/mod.ts";
+import { createInjector, inject, Injectable } from "https://deno.land/x/di/mod.ts";
 ```
 
 ## Basic Usage
@@ -28,26 +28,26 @@ import { Injectable } from "https://deno.land/x/di/mod.ts";
 
 @Injectable()
 class UserService {
-  getUsers() {
-    return ["Alice", "Bob", "Charlie"];
-  }
+    getUsers() {
+        return ["Alice", "Bob", "Charlie"];
+    }
 }
 
 @Injectable()
 class AppComponent {
-  constructor(private userService: UserService) {}
+    constructor(private userService: UserService) {}
 
-  displayUsers() {
-    const users = this.userService.getUsers();
-    console.log("Users:", users);
-  }
+    displayUsers() {
+        const users = this.userService.getUsers();
+        console.log("Users:", users);
+    }
 }
 
 // Create an injector and register providers
 import { createInjector } from "https://deno.land/x/di/mod.ts";
 
 const injector = createInjector({
-  providers: [UserService, AppComponent]
+    providers: [UserService, AppComponent],
 });
 
 // Get the component and use it
@@ -72,9 +72,9 @@ injector.registerProvider(UserService);
 Or using the verbose form:
 
 ```ts
-injector.registerProvider({ 
-  token: UserService, 
-  useClass: UserService 
+injector.registerProvider({
+    token: UserService,
+    useClass: UserService,
 });
 ```
 
@@ -89,15 +89,15 @@ import { InjectionToken } from "https://deno.land/x/di/mod.ts";
 const API_URL = new InjectionToken<string>("API_URL");
 
 // Register a value
-injector.registerProvider({ 
-  token: API_URL, 
-  useValue: "https://api.example.com" 
+injector.registerProvider({
+    token: API_URL,
+    useValue: "https://api.example.com",
 });
 
 // Use it
 @Injectable()
 class ApiService {
-  constructor(@Inject(API_URL) private apiUrl: string) {}
+    constructor(@Inject(API_URL) private apiUrl: string) {}
 }
 ```
 
@@ -107,18 +107,18 @@ For more complex creation logic:
 
 ```ts
 injector.registerProvider({
-  token: DatabaseService,
-  factory: () => {
-    const config = loadConfigFromFile();
-    return new DatabaseService(config);
-  }
+    token: DatabaseService,
+    factory: () => {
+        const config = loadConfigFromFile();
+        return new DatabaseService(config);
+    },
 });
 
 // With dependencies
 injector.registerProvider({
-  token: UserRepository,
-  factory: (db: DatabaseService) => new UserRepository(db),
-  deps: [DatabaseService]
+    token: UserRepository,
+    factory: (db: DatabaseService) => new UserRepository(db),
+    deps: [DatabaseService],
 });
 ```
 
@@ -129,8 +129,8 @@ For aliasing one token to another:
 ```ts
 // LoggerService is already registered
 injector.registerProvider({
-  token: "LOGGER",
-  useExisting: LoggerService
+    token: "LOGGER",
+    useExisting: LoggerService,
 });
 ```
 
@@ -161,9 +161,9 @@ class PerInjectorService {}
 
 // Or
 injector.registerProvider({
-  token: PerInjectorService,
-  useClass: PerInjectorService,
-  scope: Scope.INJECTOR
+    token: PerInjectorService,
+    useClass: PerInjectorService,
+    scope: Scope.INJECTOR,
 });
 ```
 
@@ -177,9 +177,9 @@ class TransientService {}
 
 // Or
 injector.registerProvider({
-  token: TransientService,
-  useClass: TransientService,
-  scope: Scope.TRANSIENT
+    token: TransientService,
+    useClass: TransientService,
+    scope: Scope.TRANSIENT,
 });
 ```
 
@@ -191,26 +191,26 @@ For non-class dependencies:
 import { InjectionToken } from "https://deno.land/x/di/mod.ts";
 
 interface Config {
-  apiUrl: string;
-  timeout: number;
+    apiUrl: string;
+    timeout: number;
 }
 
 const CONFIG = new InjectionToken<Config>("CONFIG");
 
 // Register with a value
 injector.registerProvider({
-  token: CONFIG,
-  useValue: { apiUrl: "https://api.example.com", timeout: 3000 }
+    token: CONFIG,
+    useValue: { apiUrl: "https://api.example.com", timeout: 3000 },
 });
 
 // With a default value
 const THEME = new InjectionToken<string>("THEME", {
-  defaultValue: "light"
+    defaultValue: "light",
 });
 
 // With a required flag
 const REQUIRED_SERVICE = new InjectionToken<Service>("REQUIRED_SERVICE", {
-  required: true
+    required: true,
 });
 ```
 
@@ -223,14 +223,14 @@ import { inject } from "https://deno.land/x/di/mod.ts";
 
 @Injectable()
 class UserService {
-  // Inject using the function instead of constructor parameters
-  private config = inject(CONFIG);
-  private logger = inject.optional(LoggerService); // Optional dependency
+    // Inject using the function instead of constructor parameters
+    private config = inject(CONFIG);
+    private logger = inject.optional(LoggerService); // Optional dependency
 
-  getUsers() {
-    this.logger?.log("Getting users");
-    return ["Alice", "Bob"];
-  }
+    getUsers() {
+        this.logger?.log("Getting users");
+        return ["Alice", "Bob"];
+    }
 }
 ```
 
@@ -240,12 +240,12 @@ Create parent-child relationships between injectors:
 
 ```ts
 const parentInjector = createInjector({
-  providers: [SharedService]
+    providers: [SharedService],
 });
 
 const childInjector = createInjector({
-  providers: [ChildService],
-  parentInjector
+    providers: [ChildService],
+    parentInjector,
 });
 
 // ChildService can inject SharedService
@@ -260,8 +260,8 @@ import { RootInjector } from "https://deno.land/x/di/mod.ts";
 
 // Register a global provider
 RootInjector.registerProvider({
-  token: GlobalService,
-  useClass: GlobalService
+    token: GlobalService,
+    useClass: GlobalService,
 });
 
 // Access it from anywhere
@@ -274,15 +274,15 @@ const globalService = RootInjector.get(GlobalService);
 
 ```ts
 const result = injector.run(() => {
-  // Inside this function, inject() will use the specified injector
-  const service = inject(UserService);
-  return service.processData();
+    // Inside this function, inject() will use the specified injector
+    const service = inject(UserService);
+    return service.processData();
 });
 
 // Async version
 const asyncResult = await injector.runAsync(async () => {
-  const service = inject(UserService);
-  return await service.fetchDataAsync();
+    const service = inject(UserService);
+    return await service.fetchDataAsync();
 });
 ```
 
@@ -296,6 +296,7 @@ injector.printDebug();
 ```
 
 ## TODO:
+
 - [ ] async injector
 - [ ] Handle circular dependencies
 - [x] add useExisting provider

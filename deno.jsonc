@@ -40,7 +40,8 @@
         "@std/http": "jsr:@std/http@1.0.14",
         "@std/expect": "jsr:@std/expect@^1.0.8",
         "@g43/tools": "jsr:@g43/tools@^0.0.14",
-        "@g43/math": "jsr:@g43/math@^0.0.5"
+        "@g43/math": "jsr:@g43/math@^0.0.5",
+        "reflect-metadata": "npm:reflect-metadata@0.2.2"
     },
     "compilerOptions": {
         "strict": true,

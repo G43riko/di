@@ -7,7 +7,7 @@ import type { ProviderToken, TypeResolution } from "./types.ts";
 export interface Injector {
     /**
      * Resolves a token to its instance.
-     * 
+     *
      * @template T - The type of the provider
      * @param type - The token to resolve
      * @returns The resolved instance or undefined if the token cannot be resolved
@@ -16,7 +16,7 @@ export interface Injector {
 
     /**
      * Resolves a token to its instance, throwing an error if the token cannot be resolved.
-     * 
+     *
      * @template T - The type of the provider
      * @param type - The token to resolve
      * @returns The resolved instance
@@ -32,7 +32,7 @@ export interface Injector {
     /**
      * Runs a callback with this injector set as the current injector.
      * This allows the inject() function to work within the callback.
-     * 
+     *
      * @template T - The return type of the callback
      * @param callback - The function to run with this injector as the current one
      * @returns The result of the callback
@@ -42,7 +42,7 @@ export interface Injector {
     /**
      * Runs an async callback with this injector set as the current injector.
      * This allows the inject() function to work within the callback.
-     * 
+     *
      * @template T - The return type of the callback
      * @param callback - The async function to run with this injector as the current one
      * @returns A promise that resolves to the result of the callback

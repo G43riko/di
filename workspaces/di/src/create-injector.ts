@@ -27,21 +27,21 @@ export interface CreateInjectorParams {
 
 /**
  * Creates a new dependency injection container (injector).
- * 
+ *
  * @param options - Configuration options for the injector
  * @returns A new SimpleInjector instance
- * 
+ *
  * @example
  * ```ts
  * const injector = createInjector({
  *   providers: [MyService, MyRepository],
  *   name: 'MyAppInjector'
  * });
- * 
+ *
  * // Get an instance of MyService
  * const myService = injector.get(MyService);
  * ```
- * 
+ *
  * @throws Error if the name is reserved for the root injector
  * @throws Error in strict mode if trying to register a global provider in a non-root injector
  */

@@ -11,13 +11,14 @@ import {
     isType,
     type ProviderToken,
     type ProviderType,
-    StringifyProviderToken, StringifyProviderType,
+    StringifyProviderToken,
+    StringifyProviderType,
     type Type,
     type TypeResolution,
     validateCustomProvider,
 } from "./types.ts";
 
-import "npm:reflect-metadata";
+import "reflect-metadata";
 
 /**
  * Represents an entry in the injector's internal registry.
@@ -49,7 +50,7 @@ export class SimpleInjector implements Injector {
 
     /**
      * Creates a new SimpleInjector instance.
-     * 
+     *
      * @param parent - Optional parent injector to delegate resolution to when a token is not found in this injector
      * @param name - Optional name for this injector, used for debugging purposes
      */
@@ -61,7 +62,7 @@ export class SimpleInjector implements Injector {
 
     /**
      * Resolves all registered tokens in this injector.
-     * 
+     *
      * @param allowUnresolved - When true, skips tokens that cannot be resolved instead of throwing an error
      * @returns Array of successfully resolved provider tokens
      */
@@ -86,12 +87,12 @@ export class SimpleInjector implements Injector {
 
     private validateProvider(provider: ProviderType): void {
         if (isCustomProvider(provider)) {
-            validateCustomProvider(provider)
+            validateCustomProvider(provider);
         }
     }
     /**
      * Registers a provider in this injector.
-     * 
+     *
      * @template T - The type of the provider
      * @param provider - The provider to register
      * @throws Error if the provider is invalid or if a provider with the same token is already registered
@@ -143,7 +144,9 @@ export class SimpleInjector implements Injector {
             return provider.factory();
         }
 
-        throw new Error(`Cannot resolve custom provider: ${StringifyProviderType(provider)}. Invalid provider configuration.`);
+        throw new Error(
+            `Cannot resolve custom provider: ${StringifyProviderType(provider)}. Invalid provider configuration.`,
+        );
     }
 
     private resolveParameters<T extends readonly ProviderToken[]>(parameters: T): MapArray<T> {
@@ -196,12 +199,16 @@ export class SimpleInjector implements Injector {
                 return this.resolveInjectionTokenDefaultValue(defaultValue);
             }
         }
-        throw new Error(`Cannot resolve provider type '${data.type}' for token '${StringifyProviderToken(data.token)}'. Make sure the provider is properly registered and all dependencies are available.`);
+        throw new Error(
+            `Cannot resolve provider type '${data.type}' for token '${
+                StringifyProviderToken(data.token)
+            }'. Make sure the provider is properly registered and all dependencies are available.`,
+        );
     }
 
     /**
      * Resolves a token to its instance, throwing an error if the token cannot be resolved.
-     * 
+     *
      * @template T - The type of the provider
      * @param token - The token to resolve
      * @returns The resolved instance
@@ -219,7 +226,7 @@ export class SimpleInjector implements Injector {
     /**
      * Runs a callback with this injector set as the current injector.
      * This allows the inject() function to work within the callback.
-     * 
+     *
      * @template T - The return type of the callback
      * @param callback - The function to run with this injector as the current one
      * @returns The result of the callback
@@ -236,7 +243,7 @@ export class SimpleInjector implements Injector {
     /**
      * Runs an async callback with this injector set as the current injector.
      * This allows the inject() function to work within the callback.
-     * 
+     *
      * @template T - The return type of the callback
      * @param callback - The async function to run with this injector as the current one
      * @returns A promise that resolves to the result of the callback
@@ -266,7 +273,7 @@ export class SimpleInjector implements Injector {
 
     /**
      * Resolves a token to its instance.
-     * 
+     *
      * @template T - The type of the provider
      * @param token - The token to resolve
      * @param ignoreParent - When true, doesn't look for the token in the parent injector

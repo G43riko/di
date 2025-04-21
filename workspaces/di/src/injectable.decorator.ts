@@ -1,11 +1,11 @@
-import {registerInjectable} from "./injectable.holder.ts";
-import {Scope} from "./scope.ts";
+import { registerInjectable } from "./injectable.holder.ts";
+import { Scope } from "./scope.ts";
 
 /**
  * Configuration options for the Injectable decorator.
  */
 export interface InjectableParams {
-    /** 
+    /**
      * The scope that determines the lifetime of instances of the decorated class.
      * Defaults to Scope.GLOBAL if not specified.
      */
@@ -14,11 +14,11 @@ export interface InjectableParams {
 
 /**
  * Decorator that marks a class as available to be provided and injected.
- * 
+ *
  * @template T - The type of the constructor being decorated
  * @param params - Optional configuration parameters
  * @returns A decorator function
- * 
+ *
  * @example
  * ```ts
  * @Injectable()
@@ -27,7 +27,7 @@ export interface InjectableParams {
  * }
  * ```
  */
-export function Injectable<T>(params: InjectableParams = {}): (constructor: T) => any {
+export function InjectableDecorator<T>(params: InjectableParams = {}): (constructor: T) => any {
     return (constructor: T): T => {
         registerInjectable(constructor as any, { ...params, scope: params.scope ?? Scope.GLOBAL });
         return constructor;
@@ -35,7 +35,7 @@ export function Injectable<T>(params: InjectableParams = {}): (constructor: T) =
 }
 /**
  * Helper function to create scope-specific versions of the Injectable decorator.
- * 
+ *
  * @template T - The type of the constructor being decorated
  * @param scope - The scope to apply to the decorated class
  * @returns A function that creates a decorator with the specified scope
@@ -43,16 +43,16 @@ export function Injectable<T>(params: InjectableParams = {}): (constructor: T) =
 const createScoped = <T>(scope: Scope): (params?: Omit<InjectableParams, "scope">) => (constructor: T) => any => {
     return function <T>(params = {}): (constructor: T) => any {
         return (constructor: T): T => {
-            registerInjectable(constructor as any, {...params, scope});
+            registerInjectable(constructor as any, { ...params, scope });
             return constructor;
         };
-    }
-}
+    };
+};
 
 /**
  * Decorator that marks a class as injectable with TRANSIENT scope.
  * A new instance will be created each time the class is injected.
- * 
+ *
  * @example
  * ```ts
  * @Injectable.transient()
@@ -61,12 +61,12 @@ const createScoped = <T>(scope: Scope): (params?: Omit<InjectableParams, "scope"
  * }
  * ```
  */
-Injectable.transient = createScoped(Scope.TRANSIENT);
+const transient = createScoped(Scope.TRANSIENT);
 
 /**
  * Decorator that marks a class as injectable with GLOBAL scope.
  * A single instance will be shared across all injectors.
- * 
+ *
  * @example
  * ```ts
  * @Injectable.global()
@@ -75,12 +75,12 @@ Injectable.transient = createScoped(Scope.TRANSIENT);
  * }
  * ```
  */
-Injectable.global = createScoped(Scope.GLOBAL);
+const global = createScoped(Scope.GLOBAL);
 
 /**
  * Decorator that marks a class as injectable with INJECTOR scope.
  * A single instance will be shared within each injector.
- * 
+ *
  * @example
  * ```ts
  * @Injectable.injector()
@@ -89,4 +89,10 @@ Injectable.global = createScoped(Scope.GLOBAL);
  * }
  * ```
  */
-Injectable.injector = createScoped(Scope.INJECTOR)
+const injector = createScoped(Scope.INJECTOR);
+
+export const Injectable: {
+    global: ReturnType<typeof createScoped>;
+    injector: ReturnType<typeof createScoped>;
+    transient: ReturnType<typeof createScoped>;
+} & typeof InjectableDecorator = Object.assign(InjectableDecorator, { global, injector, transient });

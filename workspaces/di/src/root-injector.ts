@@ -19,7 +19,7 @@ class RootInjectorClass extends SimpleInjector {
     /**
      * Overrides the get method to automatically register global providers when they are requested.
      * Also handles required InjectionTokens.
-     * 
+     *
      * @template T - The type of the provider
      * @param token - The token to resolve
      * @returns The resolved instance or undefined if the token cannot be resolved
@@ -58,12 +58,12 @@ class RootInjectorClass extends SimpleInjector {
 /**
  * The singleton root injector instance that serves as the default parent for all other injectors.
  * Global providers are registered and resolved through this injector.
- * 
+ *
  * @example
  * ```ts
  * // Get a global service directly from the root injector
  * const myGlobalService = RootInjector.get(MyGlobalService);
- * 
+ *
  * // Register a provider with the root injector
  * RootInjector.registerProvider({ token: 'API_URL', useValue: 'https://api.example.com' });
  * ```

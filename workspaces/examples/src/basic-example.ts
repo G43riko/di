@@ -1,5 +1,5 @@
 import { createInjector, Injectable, RootInjector } from "@g43/di";
-@Injectable.local()
+@Injectable.injector()
 class ServiceA {
     public readonly a = "PropA";
 
@@ -8,7 +8,7 @@ class ServiceA {
     }
 }
 
-@Injectable.local()
+@Injectable.injector()
 class ServiceB {
     public constructor(
         private readonly serviceA: ServiceA,

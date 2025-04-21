@@ -60,15 +60,11 @@ describe("CustomDecorators", () => {
 
         expect(() => injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toThrow();
 
-
         injector.registerProvider(DepC);
         expect(injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toBe("FACTORY_VALUE_PARAMS");
-
-        
 
         expect(injector.get("CUSTOM_EXISTING_VALUE_A")).toBe("FACTORY_VALUE_PARAMS");
         expect(injector.get("CUSTOM_EXISTING_VALUE_B")).toBeInstanceOf(DepB);
         expect(injector.get("CUSTOM_EXISTING_VALUE_C")).toBeInstanceOf(DepB);
-
     });
 });
