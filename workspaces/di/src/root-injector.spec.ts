@@ -29,7 +29,7 @@ describe("RootInjector", () => {
         expect(() => RootInjector.require(ServiceA)).toThrow();
         expect(() => RootInjector.require(ServiceB)).toThrow();
     });
-    it("should check that RootInjector allways returns same instance", () => {
+    it("should check that RootInjector always returns same instance", () => {
         expect(RootInjector.get(ServiceC)).toBe(RootInjector.get(ServiceC));
         expect(RootInjector.require(ServiceC)).toBe(RootInjector.require(ServiceC));
         expect(RootInjector.require(ServiceC)).toBe(RootInjector.get(ServiceC));

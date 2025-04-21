@@ -11,10 +11,6 @@ export function setCurrentInjector(injector: Injector | undefined): Injector | u
     return prev;
 }
 
-export function getCurrentInjector(): Injector | undefined {
-    return currentInjector;
-}
-
 export function requireCurrentInjector(): Injector {
     return GAssertRequire(currentInjector, Errors.OUTSIDE_INJECTION_CONTEXT());
 }

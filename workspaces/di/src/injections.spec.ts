@@ -84,7 +84,7 @@ describe("Injections", () => {
                 expect(() => injector.run(() => serviceE.testRequiredD())).toThrow();
             });
         });
-        it("should test valid dependency injection", () => {
+        it("should test a valid dependency injection", () => {
             const serviceA = RootInjector.require(ServiceA);
             const serviceB = RootInjector.require(ServiceB);
             expect(serviceA).toBeInstanceOf(ServiceA);

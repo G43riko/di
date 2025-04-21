@@ -192,13 +192,13 @@ export class SimpleInjector implements Injector {
     }
 
     public printDebug(): void {
-        const stringityData = Object.fromEntries(
+        const stringifyData = Object.fromEntries(
             this._holders.entries().map(([token]) => {
                 return [StringifyProviderToken(token), String(this.get(token))];
             }),
         );
         const injectorName = this.name ?? "SimpleInjector";
-        console.log(`Injector '${injectorName}' contains: ${JSON.stringify(stringityData, null, 4)}`);
+        console.log(`Injector '${injectorName}' contains: ${JSON.stringify(stringifyData, null, 4)}`);
     }
 
     public get<T>(token: ProviderToken<T>, ignoreParent = false): TypeResolution<T> | undefined {
@@ -211,7 +211,7 @@ export class SimpleInjector implements Injector {
                     return parentValue;
                 }
             }
-            // if we cannot find token in parent injector we try to use default value from InjectionToken
+            // if we cannot find token in parent injector, we try to use a default value from InjectionToken
             if (token instanceof InjectionToken && token.options?.defaultValue) {
                 return this.resolveInjectionTokenDefaultValue(token.options?.defaultValue);
             }

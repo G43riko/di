@@ -23,7 +23,7 @@ class RootInjectorClass extends SimpleInjector {
 
                 return super.get(token, true);
             } else {
-                // we are in get method so we just return undefined
+                // we are in get method, so we just return undefined
                 return;
             }
         }

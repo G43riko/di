@@ -4,7 +4,7 @@ export class InjectionToken<T> {
         public readonly options: {
             readonly defaultValue?: T | (() => T);
             /**
-             * If true, injector.get(token) will throw if token is not found in injector
+             * If true, injector.get(token) will throw if a token is not found in an injector
              */
             readonly required?: boolean;
         } = {},
