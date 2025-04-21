@@ -19,24 +19,52 @@ import {
 
 import "npm:reflect-metadata";
 
+/**
+ * Represents an entry in the injector's internal registry.
+ * @template T - The type of the provider
+ */
 export interface InjectorEntry<T> {
+    /** The provider type */
     readonly type: ProviderType<T>;
+    /** The token used to identify this provider */
     readonly token: ProviderToken;
+    /** The resolved instance, if already created */
     readonly resolution?: TypeResolution<T>;
 }
+/**
+ * Maps an array of provider tokens to their resolved types.
+ * @template T - Array of provider tokens
+ */
 export type MapArray<T extends readonly ProviderToken[]> = {
     [K in keyof T]: T[K] extends Type<infer H> ? H : T[K];
 };
 
+/**
+ * A dependency injection container that manages providers and resolves dependencies.
+ * SimpleInjector is the core implementation of the Injector interface.
+ */
 export class SimpleInjector implements Injector {
+    /** Internal map of provider tokens to their entries */
     protected readonly _holders: Map<ProviderToken<unknown>, InjectorEntry<unknown>> = new Map();
 
+    /**
+     * Creates a new SimpleInjector instance.
+     * 
+     * @param parent - Optional parent injector to delegate resolution to when a token is not found in this injector
+     * @param name - Optional name for this injector, used for debugging purposes
+     */
     public constructor(
         protected readonly parent?: Injector,
         protected readonly name?: string,
     ) {
     }
 
+    /**
+     * Resolves all registered tokens in this injector.
+     * 
+     * @param allowUnresolved - When true, skips tokens that cannot be resolved instead of throwing an error
+     * @returns Array of successfully resolved provider tokens
+     */
     public resolveAll(allowUnresolved = false): ProviderToken[] {
         const resolvedTokens: ProviderToken[] = [];
         const method = allowUnresolved ? this.get.bind(this) : this.require.bind(this);
@@ -61,6 +89,13 @@ export class SimpleInjector implements Injector {
             validateCustomProvider(provider)
         }
     }
+    /**
+     * Registers a provider in this injector.
+     * 
+     * @template T - The type of the provider
+     * @param provider - The provider to register
+     * @throws Error if the provider is invalid or if a provider with the same token is already registered
+     */
     public registerProvider<T>(provider: ProviderType<T>): void {
         if (validateProviders) {
             this.validateProvider(provider);
@@ -164,6 +199,14 @@ export class SimpleInjector implements Injector {
         throw new Error(`Cannot resolve provider type '${data.type}' for token '${StringifyProviderToken(data.token)}'. Make sure the provider is properly registered and all dependencies are available.`);
     }
 
+    /**
+     * Resolves a token to its instance, throwing an error if the token cannot be resolved.
+     * 
+     * @template T - The type of the provider
+     * @param token - The token to resolve
+     * @returns The resolved instance
+     * @throws Error if the token cannot be resolved
+     */
     public require<T>(token: ProviderToken<T>): TypeResolution<T> {
         const resolution = this.get(token);
         if (resolution) {
@@ -173,6 +216,14 @@ export class SimpleInjector implements Injector {
         throw new Error(Errors.CANNOT_FIND_TOKEN(token));
     }
 
+    /**
+     * Runs a callback with this injector set as the current injector.
+     * This allows the inject() function to work within the callback.
+     * 
+     * @template T - The return type of the callback
+     * @param callback - The function to run with this injector as the current one
+     * @returns The result of the callback
+     */
     public run<T>(callback: () => T): T {
         const prevInjector = setCurrentInjector(this);
         try {
@@ -182,6 +233,14 @@ export class SimpleInjector implements Injector {
         }
     }
 
+    /**
+     * Runs an async callback with this injector set as the current injector.
+     * This allows the inject() function to work within the callback.
+     * 
+     * @template T - The return type of the callback
+     * @param callback - The async function to run with this injector as the current one
+     * @returns A promise that resolves to the result of the callback
+     */
     public async runAsync<T>(callback: () => Promise<T>): Promise<T> {
         const prevInjector = setCurrentInjector(this);
         try {
@@ -191,6 +250,10 @@ export class SimpleInjector implements Injector {
         }
     }
 
+    /**
+     * Prints debug information about this injector to the console.
+     * Includes all registered tokens and their resolved values.
+     */
     public printDebug(): void {
         const stringifyData = Object.fromEntries(
             this._holders.entries().map(([token]) => {
@@ -201,6 +264,14 @@ export class SimpleInjector implements Injector {
         console.log(`Injector '${injectorName}' contains: ${JSON.stringify(stringifyData, null, 4)}`);
     }
 
+    /**
+     * Resolves a token to its instance.
+     * 
+     * @template T - The type of the provider
+     * @param token - The token to resolve
+     * @param ignoreParent - When true, doesn't look for the token in the parent injector
+     * @returns The resolved instance or undefined if the token cannot be resolved
+     */
     public get<T>(token: ProviderToken<T>, ignoreParent = false): TypeResolution<T> | undefined {
         const holder = this._holders.get(token) as InjectorEntry<T>;
 

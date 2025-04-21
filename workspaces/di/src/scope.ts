@@ -1,3 +1,7 @@
+/**
+ * Defines the lifetime and sharing behavior of a provider.
+ * The scope determines how instances are created and shared across injectors.
+ */
 export enum Scope {
     /**
      * Global scope means that the service will be created once per application.
