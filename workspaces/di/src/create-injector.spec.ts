@@ -5,10 +5,10 @@ import { createInjector } from "./create-injector.ts";
 import { rootInjectorName } from "./config.ts";
 
 describe("createInjector", () => {
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceA {}
 
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceB {
         public constructor(
             public readonly serviceA: ServiceA,

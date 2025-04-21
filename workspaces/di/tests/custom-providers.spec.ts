@@ -7,7 +7,7 @@ import { expect } from "@std/expect";
 class DepA {
     public readonly key = "PARAMS";
 }
-@Injectable.local()
+@Injectable.injector()
 class DepC {
     public readonly key = "VALUE";
 }

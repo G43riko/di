@@ -174,7 +174,7 @@ describe("Types", () => {
 
         it("stringifies factory provider", () => {
             const factory = () => "yo";
-            const provider = { token: "T", factory };
+            const provider = { token: "T", factory: () => "yo" };
             expect(StringifyProviderType(provider)).toBe(`FactoryProvider[${factory}]`);
         });
 
@@ -212,16 +212,20 @@ describe("Types", () => {
             expect(isCustomProvider({ token: "T", useClass: MyService })).toBe(true);
         });
 
+        it("returns true for useExisting provider", () => {
+            expect(isCustomProvider({ token: "T", useExisting: "AAAA" })).toBe(true);
+        });
+
         it("returns true for factory provider", () => {
             expect(isCustomProvider({ token: "T", factory: () => "hi" })).toBe(true);
         });
 
-        it("returns true for provider with token as string", () => {
-            expect(isCustomProvider({ token: "T" } as any)).toBe(true);
+        it("returns false for provider with token as string", () => {
+            expect(isCustomProvider({ token: "T" } as any)).toBe(false);
         });
 
-        it("returns true for provider with token as function", () => {
-            expect(isCustomProvider({ token: MyService } as any)).toBe(true);
+        it("returns false for provider with token as function", () => {
+            expect(isCustomProvider({ token: MyService } as any)).toBe(false);
         });
 
         it("returns false for invalid object", () => {

@@ -18,11 +18,11 @@ describe("Injections", () => {
         }
     }
 
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceC {}
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceD {}
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceE {
         public readonly serviceC = inject(ServiceC);
 

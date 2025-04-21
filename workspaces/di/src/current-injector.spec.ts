@@ -3,10 +3,10 @@ import { expect } from "@std/expect";
 import { Injectable } from "./injectable.decorator.ts";
 import { createInjector } from "./create-injector.ts";
 describe("createInjector", () => {
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceA {}
 
-    @Injectable.local()
+    @Injectable.injector()
     class ServiceB {
         public constructor(
             public readonly serviceA: ServiceA,

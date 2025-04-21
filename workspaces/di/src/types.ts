@@ -41,7 +41,6 @@ interface ExistingCustomProvider<T = any> extends CoreCustomProvider<T> {
 }
 
 interface FactoryCustomProvider<T = any> extends CoreCustomProvider<T> {
-    readonly scope?: Scope;
     readonly factory: (...params: any[]) => T;
     readonly deps?: readonly ProviderToken[];
 }
@@ -53,23 +52,23 @@ export type CustomProvider<T = any> =
 
 export function StringifyProviderType<T>(type: ProviderType<T>): string {
     if (isType(type)) {
-        return String(type.name);
+        return type.name || 'Anonymous Class';
     }
 
     if ("useValue" in type) {
-        return String(`ValueProvider[${type.useValue}]`);
+        return `ValueProvider[${type.useValue}]`;
     }
     if ("useClass" in type) {
-        return String(`ClassProvider[${type.useClass.name}]`);
+        return `ClassProvider[${type.useClass.name || 'Anonymous Class'}]`;
     }
     if ("factory" in type) {
-        return String(`FactoryProvider[${type.factory}]`);
+        return `FactoryProvider[${type.factory}]`;
     }
     if ("useExisting" in type) {
-        return String(`ExistingProvider[${StringifyProviderToken(type.useExisting)}]`);
+        return `ExistingProvider[${StringifyProviderToken(type.useExisting)}]`;
     }
 
-    throw new Error(`Unknown provider type: ${type}`);
+    throw new Error(`Unknown provider type: ${JSON.stringify(type)}`);
 }
 
 export function StringifyProviderToken<T>(type: ProviderToken<T>): string {
@@ -119,9 +118,10 @@ export function validateCustomProvider(provider: CustomProvider): void {
 }
 
 export function isCustomProvider(param: ProviderType): param is CustomProvider {
-    if ("useValue" in param || "useClass" in param || "factory" in param) {
-        return true;
+    if(!("token" in param)) {
+        return false;
     }
-    const type = typeof (param as any).token;
-    return type === "string" || type === "function";
+
+    return "useValue" in param || "useClass" in param || "factory" in param || "useExisting" in param;
+
 }

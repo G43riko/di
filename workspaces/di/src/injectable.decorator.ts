@@ -1,19 +1,24 @@
-import { registerInjectable } from "./injectable.holder.ts";
-import { Scope } from "./scope.ts";
-// deno-lint-ignore no-empty-interface
+import {registerInjectable} from "./injectable.holder.ts";
+import {Scope} from "./scope.ts";
+
 export interface InjectableParams {
-}
-function InjectableLocal<T>(params: InjectableParams = {}): (constructor: T) => any {
-    return (constructor: T): T => {
-        registerInjectable(constructor as any, { ...params, scope: Scope.INJECTOR });
-        return constructor;
-    };
+    readonly scope?: Scope;
 }
 export function Injectable<T>(params: InjectableParams = {}): (constructor: T) => any {
     return (constructor: T): T => {
-        registerInjectable(constructor as any, { ...params, scope: Scope.GLOBAL });
+        registerInjectable(constructor as any, { ...params, scope: params.scope ?? Scope.GLOBAL });
         return constructor;
     };
 }
+const createScoped = <T>(scope: Scope): (params?: Omit<InjectableParams, "scope">) => (constructor: T) => any => {
+    return function <T>(params = {}): (constructor: T) => any {
+        return (constructor: T): T => {
+            registerInjectable(constructor as any, {...params, scope});
+            return constructor;
+        };
+    }
+}
 
-Injectable.local = InjectableLocal;
+Injectable.transient = createScoped(Scope.TRANSIENT);
+Injectable.global = createScoped(Scope.GLOBAL);
+Injectable.injector = createScoped(Scope.INJECTOR)
