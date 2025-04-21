@@ -24,7 +24,7 @@ export function createInjector({
     parentInjector = RootInjector,
     name,
     ...params
-}: CreateInjectorParams): Injector {
+}: CreateInjectorParams): SimpleInjector {
     if (name === rootInjectorName) {
         throw new Error(`Injector name '${rootInjectorName}' is reserver for root injector`);
     }
@@ -39,7 +39,7 @@ export function createInjector({
     }
     providers.forEach((provider) => {
         if (isGlobalProviderType(provider)) {
-            (RootInjector as SimpleInjector).registerProvider(provider);
+            RootInjector.registerProvider(provider);
         } else {
             injector.registerProvider(provider);
         }

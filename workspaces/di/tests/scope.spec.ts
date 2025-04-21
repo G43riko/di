@@ -4,7 +4,6 @@ import { createInjector } from "../src/create-injector.ts";
 import { Scope } from "../src/scope.ts";
 import { InjectionToken } from "../src/injection-token.ts";
 import { RootInjector } from "../src/root-injector.ts";
-import type { SimpleInjector } from "../src/simple-injector.ts";
 
 class ServiceGlobal {}
 class ServiceInjector {}
@@ -103,7 +102,7 @@ describe("Scope", () => {
                 expect(injector.get(tokenInjector)).toBeUndefined();
                 expect(childInjector.get(tokenInjector)).toBeUndefined();
 
-                (injector as SimpleInjector).registerProvider({
+                injector.registerProvider({
                     token: tokenInjector,
                     useClass: ServiceInjector,
                     scope: Scope.INJECTOR,

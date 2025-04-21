@@ -1,7 +1,6 @@
 import { rootInjectorName } from "./config.ts";
 import { isGlobalProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
-import type { Injector } from "./injector.ts";
 import { SimpleInjector } from "./simple-injector.ts";
 import { isType, type ProviderToken, type TypeResolution } from "./types.ts";
 
@@ -39,4 +38,4 @@ class RootInjectorClass extends SimpleInjector {
     }
 }
 
-export const RootInjector: Injector = new RootInjectorClass();
+export const RootInjector: SimpleInjector = new RootInjectorClass();

@@ -2,7 +2,6 @@ import { describe, it } from "@std/testing/bdd";
 import { createInjector } from "../src/create-injector.ts";
 import { Injectable } from "../src/injectable.decorator.ts";
 import { expect } from "@std/expect";
-import type { SimpleInjector } from "../src/simple-injector.ts";
 
 @Injectable()
 class DepA {
@@ -49,7 +48,7 @@ describe("CustomDecorators", () => {
 
         expect(() => injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toThrow();
 
-        (injector as SimpleInjector).registerProvider(DepC);
+        injector.registerProvider(DepC);
         expect(injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toBe("FACTORY_VALUE_PARAMS");
     });
 });
