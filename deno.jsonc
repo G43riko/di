@@ -2,6 +2,7 @@
     "workspace": ["./workspaces/di", "./workspaces/examples"],
     "tasks": {
         "check": "deno check workspaces/**/src/**/*.ts && deno lint && deno fmt --check",
+        "doc": "deno doc --html --name=\"@g43/di\" --output=docs workspaces/di/src/index.ts",
         "check:fix": "deno check workspaces/**/src/**/*.ts && deno lint --fix && deno fmt",
         "test": "deno test **/*.spec.ts",
         "test:coverage": "deno test --clean --coverage **/*.spec.ts",
@@ -15,7 +16,7 @@
         },
         "serve:doc": {
             "dependencies": ["doc"],
-            "command": "deno run --allow-net --watch --allow-read utils/serve-doc.ts"
+            "command": "deno run --allow-net --watch --allow-read utils/serve-docs.ts"
         },
         "serve:coverage": {
             "dependencies": ["test:coverage", "coverage"],

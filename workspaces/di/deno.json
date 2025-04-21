@@ -1,5 +1,13 @@
 {
     "name": "@g43/di",
     "version": "0.0.1",
-    "exports": "./src/index.ts"
+    "exports": "./src/index.ts",
+    "publish": {
+        "exclude": ["**/*.bench.ts", "**/*.spec.ts", "**/*.mock.ts", "coverage", "docs"],
+        "include": [
+            "src/",
+            "README.md",
+            "deno.json"
+        ]
+    }
 }
