@@ -1,0 +1,1 @@
+export const strictMode = false;

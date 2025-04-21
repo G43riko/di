@@ -1,9 +1,10 @@
 import type { InjectableParams } from "./injectable.decorator.ts";
 import { assignProperty } from "./misc-utils.ts";
-import type { Type } from "./types.ts";
+import { Scope } from "./scope.ts";
+import { isCustomProvider, isType, type ProviderType, type Type } from "./types.ts";
 
 export interface InjectableOptions extends InjectableParams {
-    readonly global: boolean;
+    readonly scope: Scope;
 }
 interface InjectableHolder<T = any> {
     injectable: Type<T>;
@@ -18,10 +19,16 @@ function getSymbol(typeOrInstance: any, symbol: typeof injectableDataSymbol): In
     return typeOrInstance[symbol];
 }
 
-export function isGlobalInjectable<T>(token: Type<T>): boolean {
-    const holder = getSymbol(token, injectableDataSymbol);
-    if (holder) {
-        return holder.options.global;
+export function isGlobalProviderType<T>(token: ProviderType<T>): boolean {
+    if (isType(token)) {
+        const holder = getSymbol(token, injectableDataSymbol);
+        if (holder) {
+            return holder.options.scope === Scope.GLOBAL;
+        }
+    }
+
+    if(isCustomProvider(token)) {
+        return token.scope === Scope.GLOBAL;
     }
 
     return false;

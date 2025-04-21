@@ -1,4 +1,4 @@
-import { isGlobalInjectable } from "./injectable.holder.ts";
+import { isGlobalProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
 import { type Injector, SimpleInjector } from "./injector.ts";
 import { isType, StringifyProviderToken, type ProviderToken, type TypeResolution } from "./types.ts";
@@ -15,7 +15,7 @@ class RootInjectorClass extends SimpleInjector {
         }
 
         if (isType(token)) {
-            const isGlobal = isGlobalInjectable(token);
+            const isGlobal = isGlobalProviderType(token);
 
             if (isGlobal) {
                 this.registerProvider(token);

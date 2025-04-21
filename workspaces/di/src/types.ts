@@ -1,4 +1,5 @@
 import { InjectionToken } from "./injection-token.ts";
+import { Scope } from "./scope.ts";
 
 export function isType(v: any): v is Type<any> {
     return typeof v === "function";
@@ -25,6 +26,7 @@ export type ProviderToken<T = any> = symbol | Type<T> | string | InjectionToken<
 
 interface CoreCustomProvider<T = any> {
     readonly token: ProviderToken;
+    readonly scope?: Scope;
 }
 
 interface ValueCustomProvider<T = any> extends CoreCustomProvider<T>{
@@ -35,6 +37,7 @@ interface ClassCustomProvider<T = any> extends CoreCustomProvider<T>{
 }
 
 interface FactoryCustomProvider<T = any> extends CoreCustomProvider<T>{
+    readonly scope?: Scope;
     readonly factory: (...params: any[]) => T;
     readonly deps?: readonly ProviderToken[];
 }
