@@ -25,6 +25,18 @@ const injector = createInjector({
             useClass: DepB,
         },
         {
+            token: "CUSTOM_EXISTING_VALUE_A",
+            useExisting: "CUSTOM_TOKEN_FACTORY_PARAMS",
+        },
+        {
+            token: "CUSTOM_EXISTING_VALUE_B",
+            useExisting: "CUSTOM_CLASS_VALUE",
+        },
+        {
+            token: "CUSTOM_EXISTING_VALUE_C",
+            useExisting: "CUSTOM_EXISTING_VALUE_B",
+        },
+        {
             token: "CUSTOM_TOKEN_FACTORY_NO_PARAMS",
             factory() {
                 return "FACTORY_VALUE_NO_PARAMS";
@@ -48,7 +60,15 @@ describe("CustomDecorators", () => {
 
         expect(() => injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toThrow();
 
+
         injector.registerProvider(DepC);
         expect(injector.get("CUSTOM_TOKEN_FACTORY_PARAMS")).toBe("FACTORY_VALUE_PARAMS");
+
+        
+
+        expect(injector.get("CUSTOM_EXISTING_VALUE_A")).toBe("FACTORY_VALUE_PARAMS");
+        expect(injector.get("CUSTOM_EXISTING_VALUE_B")).toBeInstanceOf(DepB);
+        expect(injector.get("CUSTOM_EXISTING_VALUE_C")).toBeInstanceOf(DepB);
+
     });
 });

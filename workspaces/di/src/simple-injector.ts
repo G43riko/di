@@ -1,8 +1,10 @@
+import { validateProviders } from "./config.ts";
 import { setCurrentInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
 import { isTransientProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
 import type { Injector } from "./injector.ts";
+import { Scope } from "./scope.ts";
 import {
     type CustomProvider,
     getTokenFromProvider,
@@ -13,6 +15,7 @@ import {
     StringifyProviderToken,
     type Type,
     type TypeResolution,
+    validateCustomProvider,
 } from "./types.ts";
 
 import "npm:reflect-metadata";
@@ -42,7 +45,16 @@ export class SimpleInjector implements Injector {
         }
     }
 
+    private validateProvider(provider: ProviderType): void {
+        if (isCustomProvider(provider)) {
+            validateCustomProvider(provider)
+        }
+    }
     public registerProvider<T>(provider: ProviderType<T>): void {
+        if (validateProviders) {
+            this.validateProvider(provider);
+        }
+
         const token = getTokenFromProvider(provider);
 
         if (this._holders.has(token)) {
@@ -73,6 +85,9 @@ export class SimpleInjector implements Injector {
         }
         if ("useClass" in provider) {
             return this.resolveTypeProvider(provider.useClass);
+        }
+        if ("useExisting" in provider) {
+            return this.require(provider.useExisting);
         }
 
         if ("factory" in provider) {

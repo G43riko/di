@@ -6,11 +6,15 @@ import {
     isType,
     StringifyProviderToken,
     StringifyProviderType,
+    validateCustomProvider,
 } from "./types.ts";
 import { InjectionToken } from "./injection-token.ts";
 
 class MyService {}
 class AnotherService {}
+
+const dummyToken = Symbol('DummyToken');
+const DummyClass = class {};
 
 class MockInjectionToken<T = any> extends InjectionToken<T> {
     public constructor(desc: string) {
@@ -22,6 +26,109 @@ class MockInjectionToken<T = any> extends InjectionToken<T> {
     }
 }
 describe("Types", () => {
+    describe('validateCustomProvider', () => {
+        it('throws if no provider or token', () => {
+          expect(() => validateCustomProvider(undefined as any)).toThrow('Provider must have a valid token');
+          expect(() => validateCustomProvider({} as any)).toThrow('Provider must have a valid token');
+        });
+      
+        it('throws if multiple strategies are defined', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            useClass: DummyClass,
+            useValue: 123
+          })).toThrow(/exactly one strategy/);
+        });
+      
+        it('throws if no strategy is defined', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken
+          } as any)).toThrow(/exactly one strategy/);
+        });
+      
+        it('throws if scope is invalid', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            useClass: DummyClass,
+            scope: 'INVALID_SCOPE'
+          } as any)).toThrow(/'scope' must be a valid Scope enum value/);
+        });
+      
+        it('throws if useClass is not a function', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            useClass: 123
+          } as any)).toThrow(/'useClass' must be a constructor/);
+        });
+      
+        it('throws if factory is not a function', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            factory: 123
+          } as any)).toThrow(/'factory' must be a function/);
+        });
+      
+        it('throws if deps is not an array in factory', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            factory: () => {},
+            deps: 'not-array'
+          } as any)).toThrow(/'deps' must be an array of tokens/);
+        });
+      
+        it('throws if useExisting is same as token', () => {
+          const token = 'MyToken';
+          expect(() => validateCustomProvider({
+            token,
+            useExisting: token
+          } as any)).toThrow(/cannot alias to itself/);
+        });
+      
+        it('throws if useValue is undefined', () => {
+          expect(() => validateCustomProvider({
+            token: dummyToken,
+            useValue: undefined
+          })).toThrow(/'useValue' cannot be undefined/);
+        });
+      
+        // ✅ Valid cases
+        it('passes with a valid useClass provider', () => {
+          expect(() =>
+            validateCustomProvider({
+              token: dummyToken,
+              useClass: DummyClass
+            })
+          ).not.toThrow();
+        });
+      
+        it('passes with a valid useValue provider', () => {
+          expect(() =>
+            validateCustomProvider({
+              token: dummyToken,
+              useValue: 42
+            })
+          ).not.toThrow();
+        });
+      
+        it('passes with a valid factory provider and deps', () => {
+          expect(() =>
+            validateCustomProvider({
+              token: dummyToken,
+              factory: () => 'hello',
+              deps: []
+            })
+          ).not.toThrow();
+        });
+      
+        it('passes with a valid useExisting provider', () => {
+          expect(() =>
+            validateCustomProvider({
+              token: dummyToken,
+              useExisting: Symbol('OtherToken')
+            })
+          ).not.toThrow();
+        });
+      });
     describe("isType", () => {
         it("returns true for classes/functions", () => {
             expect(isType(MyService)).toBe(true);
@@ -56,6 +163,10 @@ describe("Types", () => {
             expect(StringifyProviderType(provider)).toBe("ValueProvider[42]");
         });
 
+        it("stringifies existing provider", () => {
+            const provider = { token: "T", useExisting: "S" };
+            expect(StringifyProviderType(provider)).toBe("ExistingProvider[S]");
+        });
         it("stringifies class provider", () => {
             const provider = { token: "T", useClass: AnotherService };
             expect(StringifyProviderType(provider)).toBe("ClassProvider[AnotherService]");
