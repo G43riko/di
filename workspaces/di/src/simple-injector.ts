@@ -7,8 +7,12 @@ import type { Injector } from "./injector.ts";
 import {
     type CustomProvider,
     getTokenFromProvider,
+    isClassProvider,
     isCustomProvider,
+    isExistingProvider,
+    isFactoryProvider,
     isType,
+    isValueProvider,
     type ProviderToken,
     type ProviderType,
     StringifyProviderToken,
@@ -124,18 +128,18 @@ export class SimpleInjector implements Injector {
     }
 
     private resolveCustomProvider<T>(provider: CustomProvider<T>): TypeResolution<T> {
-        if ("useValue" in provider) {
+        if (isValueProvider(provider)) {
             return provider.useValue as TypeResolution<T>;
         }
-        if ("useClass" in provider) {
+        if (isClassProvider(provider)) {
             return this.resolveTypeProvider(provider.useClass);
         }
 
-        if ("useExisting" in provider) {
+        if (isExistingProvider(provider)) {
             return this.require(provider.useExisting);
         }
 
-        if ("factory" in provider) {
+        if (isFactoryProvider(provider)) {
             if (provider.deps?.length) {
                 return provider.factory(
                     ...this.resolveParameters(provider.deps),

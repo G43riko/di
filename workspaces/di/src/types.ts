@@ -21,7 +21,7 @@ export interface Type<T = object> {
     name?: string;
 
     /** Constructor signature */
-    new (...args: any[]): T;
+    new(...args: any[]): T;
 }
 
 /**
@@ -140,20 +140,35 @@ export function StringifyProviderType<T>(type: ProviderType<T>): string {
         return type.name || "Anonymous Class";
     }
 
-    if ("useValue" in type) {
+    if (isValueProvider(type)) {
         return `ValueProvider[${type.useValue}]`;
     }
-    if ("useClass" in type) {
+    if (isClassProvider(type)) {
         return `ClassProvider[${type.useClass.name || "Anonymous Class"}]`;
     }
-    if ("factory" in type) {
+    if (isFactoryProvider(type)) {
         return `FactoryProvider[${type.factory}]`;
     }
-    if ("useExisting" in type) {
+    if (isExistingProvider(type)) {
         return `ExistingProvider[${StringifyProviderToken(type.useExisting)}]`;
     }
 
     throw new Error(`Unknown provider type: ${JSON.stringify(type)}`);
+}
+
+export function isClassProvider<T>(type: ProviderType<T>): type is ClassCustomProvider<T> {
+    return "useClass" in type;
+}
+
+export function isValueProvider<T>(type: ProviderType<T>): type is ValueCustomProvider<T> {
+    return "useValue" in type;
+}
+
+export function isExistingProvider<T>(type: ProviderType<T>): type is ExistingCustomProvider<T> {
+    return "useExisting" in type;
+}
+export function isFactoryProvider<T>(type: ProviderType<T>): type is FactoryCustomProvider<T> {
+    return "factory" in type;
 }
 
 /**
@@ -196,23 +211,24 @@ export function validateCustomProvider(provider: CustomProvider): void {
         throw new Error(`'scope' must be a valid Scope enum value`);
     }
 
-    // validate different
-    if ("useClass" in provider && typeof provider.useClass !== "function") {
+    // validate different strategies
+    if (isValueProvider(provider) && provider.useValue === undefined) {
+        throw new Error(`'useValue' cannot be undefined`);
+    }
+    if (isClassProvider(provider) && typeof provider.useClass !== "function") {
         throw new Error(`'useClass' must be a constructor`);
-    } else if ("useExisting" in provider) {
-        if (provider.token === provider.useExisting) {
-            throw new Error(`'${StringifyProviderToken(provider.token)}' cannot alias to itself`);
-        }
-    } else if ("factory" in provider) {
+    }
+    if (isExistingProvider(provider) && provider.token === provider.useExisting) {
+        throw new Error(`'${StringifyProviderToken(provider.token)}' cannot alias to itself`);
+    }
+    if (isFactoryProvider(provider)) {
         if (typeof provider.factory !== "function") {
             throw new Error(`'factory' must be a function`);
         }
         if ("deps" in provider && provider.deps && !Array.isArray(provider.deps)) {
             throw new Error(`'deps' must be an array of tokens`);
         }
-    } else if ("useValue" in provider && provider.useValue === undefined) {
-        throw new Error(`'useValue' cannot be undefined`);
-    }
+    } 
 }
 
 /**
@@ -226,5 +242,5 @@ export function isCustomProvider(param: ProviderType): param is CustomProvider {
         return false;
     }
 
-    return "useValue" in param || "useClass" in param || "factory" in param || "useExisting" in param;
+    return  isClassProvider(param) || isValueProvider(param) || isFactoryProvider(param) || isExistingProvider(param);
 }
