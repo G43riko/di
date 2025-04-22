@@ -1,7 +1,7 @@
 import { validateProviders } from "./config.ts";
 import { setCurrentInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
-import { isTransientProviderType } from "./injectable.holder.ts";
+import { isInjectable, isTransientProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
 import type { Injector } from "./injector.ts";
 import {
@@ -90,7 +90,11 @@ export class SimpleInjector implements Injector {
     }
 
     private validateProvider(provider: ProviderType): void {
-        if (isCustomProvider(provider)) {
+        if(isType(provider)) {
+            if(!isInjectable) {
+                throw new Error(`Class '${StringifyProviderType(provider)}' must be annotated witch @Injectable decorator`);
+            }
+        } else if (isCustomProvider(provider)) {
             validateCustomProvider(provider);
         }
     }

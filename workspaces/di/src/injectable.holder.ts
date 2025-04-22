@@ -19,6 +19,9 @@ const injectables: Map<any, InjectableHolder> = new Map();
 function getSymbol(typeOrInstance: any, symbol: typeof injectableDataSymbol): InjectableHolder | undefined {
     return typeOrInstance[symbol];
 }
+export function isInjectable(inject: Type): boolean {
+    return Boolean(getSymbol(inject, injectableDataSymbol))
+}
 export function getScope(token: ProviderType): Scope {
     if (isType(token)) {
         const holder = getSymbol(token, injectableDataSymbol);
