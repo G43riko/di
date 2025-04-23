@@ -1,4 +1,4 @@
-import { validateProviders } from "./config.ts";
+import { enableConstructorInjection, validateProviders } from "./config.ts";
 import { setCurrentInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
 import { isInjectable, isTransientProviderType } from "./injectable.holder.ts";
@@ -22,7 +22,6 @@ import {
     validateCustomProvider,
 } from "./types.ts";
 
-import "reflect-metadata";
 
 /**
  * Represents an entry in the injector's internal registry.
@@ -90,8 +89,8 @@ export class SimpleInjector implements Injector {
     }
 
     private validateProvider(provider: ProviderType): void {
-        if(isType(provider)) {
-            if(!isInjectable) {
+        if (isType(provider)) {
+            if (!isInjectable) {
                 throw new Error(`Class '${StringifyProviderType(provider)}' must be annotated witch @Injectable decorator`);
             }
         } else if (isCustomProvider(provider)) {
@@ -172,6 +171,9 @@ export class SimpleInjector implements Injector {
             return undefined;
         }
 
+        if (!enableConstructorInjection) {
+            throw new Error("Constructor parameters are disabled");
+        }
         const resolvedParams = this.resolveParameters(parameters);
 
         if (resolvedParams.some((e: TypeResolution) => typeof e === "undefined")) {
@@ -208,8 +210,7 @@ export class SimpleInjector implements Injector {
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${data.type}' for token '${
-                StringifyProviderToken(data.token)
+            `Cannot resolve provider type '${data.type}' for token '${StringifyProviderToken(data.token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }

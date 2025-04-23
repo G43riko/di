@@ -1,3 +1,5 @@
+import "reflect-metadata";
+
 export { SimpleInjector } from "./simple-injector.ts";
 export { type CustomProvider, type ProviderToken, type ProviderType, type Type, type TypeResolution } from "./types.ts";
 export { Injectable, type InjectableParams } from "./injectable.decorator.ts";
