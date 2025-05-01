@@ -4,8 +4,8 @@
         "check": "deno check workspaces/**/src/**/*.ts && deno lint && deno fmt --check",
         "doc": "deno doc --html --name=\"@g43/di\" --output=docs workspaces/di/src/index.ts",
         "check:fix": "deno check workspaces/**/src/**/*.ts && deno lint --fix && deno fmt",
-        "test": "deno test **/*.spec.ts",
-        "test:coverage": "deno test --clean --coverage **/*.spec.ts",
+        "test": "deno test --parallel **/*.spec.ts",
+        "test:coverage": "deno test --parallel --clean --coverage **/*.spec.ts",
         "coverage": {
             "dependencies": ["test:coverage"],
             "command": "deno coverage --html --exclude=\"(spec|bench)\\.(js|mjs|ts|jsx|tsx)$\""
