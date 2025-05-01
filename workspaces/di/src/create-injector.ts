@@ -52,7 +52,7 @@ export function createInjector({
     ...params
 }: CreateInjectorParams): SimpleInjector {
     if (name === rootInjectorName) {
-        throw new Error(`Injector name '${rootInjectorName}' is reserver for root injector`);
+        throw new Error(`Injector name '${rootInjectorName}' is reserved for root injector`);
     }
     const injector = new SimpleInjector(parentInjector, name);
 

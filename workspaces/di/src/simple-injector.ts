@@ -90,9 +90,9 @@ export class SimpleInjector implements Injector {
 
     private validateProvider(provider: ProviderType): void {
         if (isType(provider)) {
-            if (!isInjectable) {
+            if (!isInjectable(provider)) {
                 throw new Error(
-                    `Class '${StringifyProviderType(provider)}' must be annotated witch @Injectable decorator`,
+                    `Class '${StringifyProviderType(provider)}' must be annotated with @Injectable decorator`,
                 );
             }
         } else if (isCustomProvider(provider)) {

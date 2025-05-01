@@ -14,7 +14,7 @@ export enum Scope {
      */
     INJECTOR = "injector",
     /**
-     * * Transient scope means that a new instance of the service will be created each time it is requested.
+     * Transient scope means that a new instance of the service will be created each time it is requested.
      */
     TRANSIENT = "transient",
 }
