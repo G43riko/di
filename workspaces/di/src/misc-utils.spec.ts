@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { GAssertRequire, assignProperty } from "./misc-utils.ts";
+import { assignProperty, GAssertRequire } from "./misc-utils.ts";
 
 describe("Misc Utils", () => {
     describe("GAssertRequire", () => {
@@ -60,7 +60,7 @@ describe("Misc Utils", () => {
             // Attempt to modify the property
             try {
                 (obj as any).testProp = "newValue";
-            } catch (e) {
+            } catch (_) {
                 // Some environments throw, others silently fail
             }
 
@@ -75,7 +75,7 @@ describe("Misc Utils", () => {
             // Attempt to delete the property
             try {
                 delete (obj as any).testProp;
-            } catch (e) {
+            } catch (_) {
                 // Some environments throw, others silently fail
             }
 

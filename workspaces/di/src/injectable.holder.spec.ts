@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { registerInjectable, getScope, isTransientProviderType, isGlobalProviderType } from "./injectable.holder.ts";
+import { getScope, isGlobalProviderType, isTransientProviderType, registerInjectable } from "./injectable.holder.ts";
 import { Scope } from "./scope.ts";
 import { Injectable } from "./injectable.decorator.ts";
 
@@ -43,7 +43,7 @@ describe("Injectable Holder", () => {
             const customProvider = {
                 token: "token",
                 useValue: "value",
-                scope: Scope.TRANSIENT
+                scope: Scope.TRANSIENT,
             };
 
             expect(getScope(customProvider)).toBe(Scope.TRANSIENT);
@@ -59,7 +59,7 @@ describe("Injectable Holder", () => {
         it("should return default scope for custom providers without scope", () => {
             const customProvider = {
                 token: "token",
-                useValue: "value"
+                useValue: "value",
             };
 
             // Default scope is INJECTOR according to config.ts
@@ -90,7 +90,7 @@ describe("Injectable Holder", () => {
         it("should return false for custom providers without transient scope", () => {
             const customProvider = {
                 token: "token",
-                useValue: "value"
+                useValue: "value",
             };
 
             expect(isTransientProviderType(customProvider)).toBe(false);
@@ -100,7 +100,7 @@ describe("Injectable Holder", () => {
             const customProvider = {
                 token: "token",
                 useValue: "value",
-                scope: Scope.TRANSIENT
+                scope: Scope.TRANSIENT,
             };
 
             expect(isTransientProviderType(customProvider)).toBe(true);
@@ -130,7 +130,7 @@ describe("Injectable Holder", () => {
         it("should return true for custom providers without scope (default is GLOBAL)", () => {
             const customProvider = {
                 token: "token",
-                useValue: "value"
+                useValue: "value",
             };
 
             expect(isGlobalProviderType(customProvider)).toBe(false);
@@ -140,7 +140,7 @@ describe("Injectable Holder", () => {
             const customProvider = {
                 token: "token",
                 useValue: "value",
-                scope: Scope.GLOBAL
+                scope: Scope.GLOBAL,
             };
 
             expect(isGlobalProviderType(customProvider)).toBe(true);

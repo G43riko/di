@@ -83,7 +83,7 @@ describe("SimpleInjector", () => {
             const injector = new SimpleInjector();
             injector.registerProvider({
                 token: TOKEN,
-                useValue: "test-value"
+                useValue: "test-value",
             });
 
             const value = injector.require(TOKEN);
@@ -112,7 +112,7 @@ describe("SimpleInjector", () => {
             injector.registerProvider({
                 token: ServiceB,
                 factory: (serviceA: ServiceA) => new ServiceB(serviceA.value),
-                deps: [ServiceA]
+                deps: [ServiceA],
             });
 
             const serviceB = injector.require(ServiceB);
@@ -125,7 +125,7 @@ describe("SimpleInjector", () => {
             injector.registerProvider(ServiceA);
             injector.registerProvider({
                 token: TOKEN,
-                useExisting: ServiceA
+                useExisting: ServiceA,
             });
 
             const value = injector.require(TOKEN);
@@ -166,7 +166,7 @@ describe("SimpleInjector", () => {
             const childInjector = new SimpleInjector(parentInjector);
             childInjector.registerProvider({
                 token: ServiceA,
-                useValue: { value: "OverriddenServiceA" }
+                useValue: { value: "OverriddenServiceA" },
             });
 
             const serviceA = childInjector.require(ServiceA);
@@ -224,6 +224,7 @@ describe("SimpleInjector", () => {
 
             const asyncResult = await injector.runAsync(async () => {
                 const serviceA = inject(ServiceA);
+                await new Promise((resolve) => setTimeout(resolve, 1000));
                 return serviceA.value;
             });
 
@@ -233,11 +234,11 @@ describe("SimpleInjector", () => {
 
     describe("InjectionToken default values", () => {
         const TOKEN_WITH_VALUE = new InjectionToken<string>("token-with-value", {
-            defaultValue: "default-value"
+            defaultValue: "default-value",
         });
 
         const TOKEN_WITH_FACTORY = new InjectionToken<string>("token-with-factory", {
-            defaultValue: () => "factory-value"
+            defaultValue: () => "factory-value",
         });
 
         it("should use default value when token is not provided", () => {
@@ -258,7 +259,7 @@ describe("SimpleInjector", () => {
             const injector = new SimpleInjector();
             injector.registerProvider({
                 token: TOKEN_WITH_VALUE,
-                useValue: "registered-value"
+                useValue: "registered-value",
             });
 
             const value = injector.require(TOKEN_WITH_VALUE);

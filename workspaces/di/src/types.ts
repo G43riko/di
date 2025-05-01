@@ -21,7 +21,7 @@ export interface Type<T = object> {
     name?: string;
 
     /** Constructor signature */
-    new(...args: any[]): T;
+    new (...args: any[]): T;
 }
 
 /**
@@ -228,7 +228,7 @@ export function validateCustomProvider(provider: CustomProvider): void {
         if ("deps" in provider && provider.deps && !Array.isArray(provider.deps)) {
             throw new Error(`'deps' must be an array of tokens`);
         }
-    } 
+    }
 }
 
 /**
@@ -242,5 +242,5 @@ export function isCustomProvider(param: ProviderType): param is CustomProvider {
         return false;
     }
 
-    return  isClassProvider(param) || isValueProvider(param) || isFactoryProvider(param) || isExistingProvider(param);
+    return isClassProvider(param) || isValueProvider(param) || isFactoryProvider(param) || isExistingProvider(param);
 }

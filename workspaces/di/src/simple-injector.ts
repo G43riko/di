@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { enableConstructorInjection, validateProviders } from "./config.ts";
 import { setCurrentInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
@@ -21,7 +22,6 @@ import {
     type TypeResolution,
     validateCustomProvider,
 } from "./types.ts";
-
 
 /**
  * Represents an entry in the injector's internal registry.
@@ -91,7 +91,9 @@ export class SimpleInjector implements Injector {
     private validateProvider(provider: ProviderType): void {
         if (isType(provider)) {
             if (!isInjectable) {
-                throw new Error(`Class '${StringifyProviderType(provider)}' must be annotated witch @Injectable decorator`);
+                throw new Error(
+                    `Class '${StringifyProviderType(provider)}' must be annotated witch @Injectable decorator`,
+                );
             }
         } else if (isCustomProvider(provider)) {
             validateCustomProvider(provider);
@@ -210,7 +212,8 @@ export class SimpleInjector implements Injector {
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${data.type}' for token '${StringifyProviderToken(data.token)
+            `Cannot resolve provider type '${data.type}' for token '${
+                StringifyProviderToken(data.token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }

@@ -20,7 +20,7 @@ function getSymbol(typeOrInstance: any, symbol: typeof injectableDataSymbol): In
     return typeOrInstance[symbol];
 }
 export function isInjectable(inject: Type): boolean {
-    return Boolean(getSymbol(inject, injectableDataSymbol))
+    return Boolean(getSymbol(inject, injectableDataSymbol));
 }
 export function getScope(token: ProviderType): Scope {
     if (isType(token)) {
