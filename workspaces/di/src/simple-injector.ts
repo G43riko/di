@@ -134,7 +134,7 @@ export class SimpleInjector implements Injector {
 
     private resolveCustomProvider<T>(provider: CustomProvider<T>): TypeResolution<T> {
         if (isValueProvider(provider)) {
-            return provider.useValue as TypeResolution<T>;
+            return provider.useValue;
         }
         if (isClassProvider(provider)) {
             return this.resolveTypeProvider(provider.useClass);

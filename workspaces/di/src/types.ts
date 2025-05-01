@@ -207,7 +207,7 @@ export function validateCustomProvider(provider: CustomProvider): void {
     }
 
     // validate scope
-    if ("scope" in provider && !Object.values(Scope).includes(provider.scope!)) {
+    if (provider.scope && !Object.values(Scope).includes(provider.scope)) {
         throw new Error(`'scope' must be a valid Scope enum value`);
     }
 
