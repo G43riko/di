@@ -210,10 +210,10 @@ describe("SimpleInjector", () => {
 
             const serviceB = injector.require(ServiceB);
 
-            // Should throw outside of injection context
+            // Should throw outside an injection context
             expect(() => serviceB.getServiceA()).toThrow();
 
-            // Should work inside injection context
+            // Should work inside an injection context
             const serviceA = injector.run(() => serviceB.getServiceA());
             expect(serviceA).toBeInstanceOf(ServiceA);
         });

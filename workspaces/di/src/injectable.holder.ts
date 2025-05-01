@@ -2,7 +2,10 @@ import { defaultScope } from "./config.ts";
 import { assignProperty } from "./misc-utils.ts";
 import { Scope } from "./scope.ts";
 import { isCustomProvider, isType, type ProviderType, type Type } from "./types.ts";
-import type { InjectableOptions } from "./injectable-options.ts";
+
+export interface InjectableOptions {
+    readonly scope: Scope;
+}
 
 interface InjectableHolder<T = any> {
     injectable: Type<T>;

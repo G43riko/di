@@ -52,7 +52,7 @@ describe("Injectable Holder", () => {
         it("should return default scope for unregistered types", () => {
             class UnregisteredService {}
 
-            // Default scope is INJECTOR according to config.ts
+            // A default scope is INJECTOR, according to config.ts
             expect(getScope(UnregisteredService)).toBe(Scope.INJECTOR);
         });
 
@@ -62,7 +62,7 @@ describe("Injectable Holder", () => {
                 useValue: "value",
             };
 
-            // Default scope is INJECTOR according to config.ts
+            // A default scope is INJECTOR, according to config.ts
             expect(getScope(customProvider)).toBe(Scope.INJECTOR);
         });
     });

@@ -4,7 +4,7 @@ import { Scope } from "./scope.ts";
 /**
  * Configuration options for the Injectable decorator.
  */
-export interface InjectableParams {
+export interface InjectableDecoratorParams {
     /**
      * The scope that determines the lifetime of instances of the decorated class.
      * Defaults to Scope.GLOBAL if not specified.
@@ -27,7 +27,7 @@ export interface InjectableParams {
  * }
  * ```
  */
-export function InjectableDecorator<T>(params: InjectableParams = {}): (constructor: T) => any {
+export function InjectableDecorator<T>(params: InjectableDecoratorParams = {}): (constructor: T) => any {
     return (constructor: T): T => {
         registerInjectable(constructor as any, { ...params, scope: params.scope ?? Scope.GLOBAL });
         return constructor;
@@ -40,7 +40,9 @@ export function InjectableDecorator<T>(params: InjectableParams = {}): (construc
  * @param scope - The scope to apply to the decorated class
  * @returns A function that creates a decorator with the specified scope
  */
-const createScoped = <T>(scope: Scope): (params?: Omit<InjectableParams, "scope">) => (constructor: T) => any => {
+const createScopedDecorator = <T>(
+    scope: Scope,
+): (params?: Omit<InjectableDecoratorParams, "scope">) => (constructor: T) => any => {
     return function <T>(params = {}): (constructor: T) => any {
         return (constructor: T): T => {
             registerInjectable(constructor as any, { ...params, scope });
@@ -61,7 +63,7 @@ const createScoped = <T>(scope: Scope): (params?: Omit<InjectableParams, "scope"
  * }
  * ```
  */
-const transient = createScoped(Scope.TRANSIENT);
+const transient = createScopedDecorator(Scope.TRANSIENT);
 
 /**
  * Decorator that marks a class as injectable with GLOBAL scope.
@@ -75,7 +77,7 @@ const transient = createScoped(Scope.TRANSIENT);
  * }
  * ```
  */
-const global = createScoped(Scope.GLOBAL);
+const global = createScopedDecorator(Scope.GLOBAL);
 
 /**
  * Decorator that marks a class as injectable with INJECTOR scope.
@@ -89,10 +91,10 @@ const global = createScoped(Scope.GLOBAL);
  * }
  * ```
  */
-const injector = createScoped(Scope.INJECTOR);
+const injector = createScopedDecorator(Scope.INJECTOR);
 
 export const Injectable: {
-    global: ReturnType<typeof createScoped>;
-    injector: ReturnType<typeof createScoped>;
-    transient: ReturnType<typeof createScoped>;
+    global: ReturnType<typeof createScopedDecorator>;
+    injector: ReturnType<typeof createScopedDecorator>;
+    transient: ReturnType<typeof createScopedDecorator>;
 } & typeof InjectableDecorator = Object.assign(InjectableDecorator, { global, injector, transient });

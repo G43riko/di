@@ -90,7 +90,7 @@ describe("Injections", () => {
             expect(serviceA).toBeInstanceOf(ServiceA);
             expect(serviceB).toBeInstanceOf(ServiceB);
             expect(serviceB.serviceA).toBeInstanceOf(ServiceA);
-            // should throw because `inject` is called outside of injection context
+            // should throw because `inject` is called outside an injection context
             expect(() => serviceB.testA()).toThrow();
             expect(RootInjector.run(() => serviceB.testA())).toBeInstanceOf(ServiceA);
         });

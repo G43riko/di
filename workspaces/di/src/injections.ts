@@ -1,5 +1,6 @@
 import { requireCurrentInjector } from "./current-injector.ts";
 import type { ProviderToken, TypeResolution } from "./types.ts";
+import { enableInject } from "./config.ts";
 
 /**
  * Retrieves a dependency from the current injector.
@@ -22,6 +23,9 @@ import type { ProviderToken, TypeResolution } from "./types.ts";
  * ```
  */
 export function inject<T>(token: ProviderToken<T>): TypeResolution<T> {
+    if (!enableInject) {
+        throw new Error("inject is disabled");
+    }
     const injector = requireCurrentInjector();
 
     return injector.require(token);

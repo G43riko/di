@@ -18,7 +18,7 @@ class RootInjectorClass extends SimpleInjector {
 
     /**
      * Overrides the get method to automatically register global providers when they are requested.
-     * Also handles required InjectionTokens.
+     * Also, handles required InjectionTokens.
      *
      * @template T - The type of the provider
      * @param token - The token to resolve

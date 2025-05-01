@@ -16,7 +16,7 @@ export interface CreateInjectorParams {
     /** Parent injector to delegate resolution to when a token is not found in this injector */
     readonly parentInjector?: Injector;
     /**
-     * If set to true, create injector method creates instances of all providers immediately
+     * If set to true, a create injector method creates instances of all providers immediately
      */
     readonly instantiateImmediately?: boolean;
     /**
