@@ -60,7 +60,6 @@ jobs:
                   else
                       echo "changed=false" >> "$GITHUB_OUTPUT"
                   fi
-                  echo "Output: $GITHUB_OUTPUT"
             - name: Extract version
               id: extract
               run: |
@@ -76,9 +75,5 @@ jobs:
         steps:
             - name: Checkout repo
               uses: actions/checkout@v4
-            - name: Tag release
-              run: |
-                  git tag v${{ needs.version-check.outputs.version }}
-                  git push origin v${{ needs.version-check.outputs.version }}
             - name: Publish to JSR
               run: npx jsr publish
