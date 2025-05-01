@@ -1,3 +1,14 @@
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/G43riko/di/blob/master/LICENSE)
+[![Buld and test](https://github.com/G43riko/di/actions/workflows/publish.yml/badge.svg)](https://github.com/G43riko/di/actions/workflows/publish.yml)
+![REPO SIZE](https://img.shields.io/github/repo-size/G43riko/di.svg?style=flat-square)
+![CODE SIZE](https://img.shields.io/github/languages/code-size/G43riko/di.svg?style=flat-square)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=coverage)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=G43riko_di&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=G43riko_di)
+
 # Dependency Injection for Deno
 
 A lightweight, powerful dependency injection library for Deno applications, inspired by Angular's DI system.
