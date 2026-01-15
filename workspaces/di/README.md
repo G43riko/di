@@ -13,29 +13,41 @@
 
 A lightweight, powerful dependency injection library for Deno applications, inspired by Angular's DI system.
 
+## Overview
+
+This library provides a robust and flexible dependency injection system for Deno. It supports hierarchical injectors, multiple provider types, and different lifetime scopes, all with first-class TypeScript support.
+
 ## Features
 
-- Simple and intuitive API
-- Type-safe dependency resolution
-- Support for various provider types (value, class, factory, existing)
-- Hierarchical injector system
-- Configurable provider scopes (global, injector, transient)
-- Injection tokens for non-class dependencies
-- Function-based injection with `inject()`
+- **Simple API**: Intuitive and easy to use.
+- **Type-safe**: Full TypeScript support for dependency resolution.
+- **Multiple Provider Types**: Support for `useValue`, `useClass`, `factory`, and `useExisting`.
+- **Hierarchical Injectors**: Parent-child injector relationships.
+- **Configurable Scopes**: `GLOBAL`, `INJECTOR`, and `TRANSIENT` scopes.
+- **Injection Tokens**: Support for non-class dependencies.
+- **Functional Injection**: Use `inject()` for more flexible dependency retrieval.
+- **Asynchronous Support**: Correctly handles asynchronous boundaries using `AsyncLocalStorage`.
+
+## Requirements
+
+- [Deno](https://deno.land/) (recommended version: latest)
 
 ## Installation
 
+You can import the library directly from the workspace or via its entry point:
+
 ```ts
-// Import from deno.land
-import { createInjector, inject, Injectable } from "https://deno.land/x/di/mod.ts";
+import { createInjector, inject, Injectable } from "@g43/di";
 ```
+
+*Note: For production use, you would typically import from a published JSR or deno.land/x URL.*
 
 ## Basic Usage
 
 ### Creating a Simple Service
 
 ```ts
-import { Injectable } from "https://deno.land/x/di/mod.ts";
+import { Injectable, createInjector } from "@g43/di";
 
 @Injectable()
 class UserService {
@@ -55,8 +67,6 @@ class AppComponent {
 }
 
 // Create an injector and register providers
-import { createInjector } from "https://deno.land/x/di/mod.ts";
-
 const injector = createInjector({
     providers: [UserService, AppComponent],
 });
@@ -70,19 +80,14 @@ app.displayUsers(); // Output: Users: ["Alice", "Bob", "Charlie"]
 
 ### Class Providers
 
-The simplest form is using the class itself:
-
 ```ts
 @Injectable()
 class UserService {}
 
 // Register the class directly
 injector.registerProvider(UserService);
-```
 
-Or using the verbose form:
-
-```ts
+// Or using the verbose form
 injector.registerProvider({
     token: UserService,
     useClass: UserService,
@@ -91,11 +96,8 @@ injector.registerProvider({
 
 ### Value Providers
 
-For providing simple values:
-
 ```ts
-// Create a token
-import { InjectionToken } from "https://deno.land/x/di/mod.ts";
+import { InjectionToken } from "@g43/di";
 
 const API_URL = new InjectionToken<string>("API_URL");
 
@@ -108,13 +110,11 @@ injector.registerProvider({
 // Use it
 @Injectable()
 class ApiService {
-    constructor(@Inject(API_URL) private apiUrl: string) {}
+    private apiUrl = inject(API_URL);
 }
 ```
 
 ### Factory Providers
-
-For more complex creation logic:
 
 ```ts
 injector.registerProvider({
@@ -135,8 +135,6 @@ injector.registerProvider({
 
 ### Existing Providers
 
-For aliasing one token to another:
-
 ```ts
 // LoggerService is already registered
 injector.registerProvider({
@@ -146,8 +144,6 @@ injector.registerProvider({
 ```
 
 ### Multi-providers
-
-For providing multiple values for the same token:
 
 ```ts
 const VALIDATOR = new InjectionToken<Validator[]>("VALIDATOR");
@@ -169,11 +165,9 @@ const validators = injector.get(VALIDATOR); // [RequiredValidator instance, Emai
 
 ## Scopes
 
-Control the lifetime of your services:
-
 ### Global Scope (Default)
 
-A single instance shared across all injectors:
+A single instance shared across all injectors.
 
 ```ts
 @Injectable()
@@ -186,13 +180,13 @@ class ExplicitGlobalService {}
 
 ### Injector Scope
 
-A new instance for each injector:
+A new instance for each injector.
 
 ```ts
 @Injectable.injector()
 class PerInjectorService {}
 
-// Or
+// Or via provider configuration
 injector.registerProvider({
     token: PerInjectorService,
     useClass: PerInjectorService,
@@ -202,13 +196,13 @@ injector.registerProvider({
 
 ### Transient Scope
 
-A new instance each time it's requested:
+A new instance each time it's requested.
 
 ```ts
 @Injectable.transient()
 class TransientService {}
 
-// Or
+// Or via provider configuration
 injector.registerProvider({
     token: TransientService,
     useClass: TransientService,
@@ -218,10 +212,8 @@ injector.registerProvider({
 
 ## Injection Tokens
 
-For non-class dependencies:
-
 ```ts
-import { InjectionToken } from "https://deno.land/x/di/mod.ts";
+import { InjectionToken } from "@g43/di";
 
 interface Config {
     apiUrl: string;
@@ -240,11 +232,6 @@ injector.registerProvider({
 const THEME = new InjectionToken<string>("THEME", {
     defaultValue: "light",
 });
-
-// With a required flag
-const REQUIRED_SERVICE = new InjectionToken<Service>("REQUIRED_SERVICE", {
-    required: true,
-});
 ```
 
 ## Function-based Injection
@@ -252,7 +239,7 @@ const REQUIRED_SERVICE = new InjectionToken<Service>("REQUIRED_SERVICE", {
 Use the `inject()` function for more flexible injection:
 
 ```ts
-import { inject } from "https://deno.land/x/di/mod.ts";
+import { inject } from "@g43/di";
 
 @Injectable()
 class UserService {
@@ -267,11 +254,7 @@ class UserService {
 }
 ```
 
-Function-based injection works correctly even across asynchronous boundaries (using `AsyncLocalStorage`).
-
 ## Hierarchical Injectors
-
-Create parent-child relationships between injectors:
 
 ```ts
 const parentInjector = createInjector({
@@ -282,8 +265,6 @@ const childInjector = createInjector({
     providers: [ChildService],
     parentInjector,
 });
-
-// ChildService can inject SharedService
 ```
 
 ## Root Injector
@@ -291,7 +272,7 @@ const childInjector = createInjector({
 Access the global root injector:
 
 ```ts
-import { RootInjector } from "https://deno.land/x/di/mod.ts";
+import { RootInjector } from "@g43/di";
 
 // Register a global provider
 RootInjector.registerProvider({
@@ -303,32 +284,29 @@ RootInjector.registerProvider({
 const globalService = RootInjector.get(GlobalService);
 ```
 
-## Advanced Usage
+## Project Structure
 
-### Running Code with an Injector Context
+- `workspaces/di/src/`: Core library source code.
+- `workspaces/di/tests/`: Unit and integration tests.
+- `workspaces/examples/src/`: Example applications and usage demonstrations.
+- `deno.jsonc`: Main Deno configuration and task definitions.
 
-```ts
-const result = injector.run(() => {
-    // Inside this function, inject() will use the specified injector
-    const service = inject(UserService);
-    return service.processData();
-});
+## Scripts
 
-// Async version
-const asyncResult = await injector.runAsync(async () => {
-    const service = inject(UserService);
-    return await service.fetchDataAsync();
-});
-```
+This project uses Deno tasks for development and maintenance.
 
-### Debugging
+- `deno task check`: Runs type checking, linting, and formatting checks.
+- `deno task check:fix`: Runs type checking, and applies linting and formatting fixes.
+- `deno task test`: Runs all tests in parallel.
+- `deno task test:coverage`: Runs tests and generates coverage data.
+- `deno task coverage`: Generates a HTML coverage report.
+- `deno task doc`: Generates HTML documentation.
+- `deno task serve:doc`: Serves the generated documentation.
+- `deno task serve:coverage`: Serves the coverage report.
 
-Print the contents of an injector:
+## License
 
-```ts
-injector.printDebug();
-// Output: Injector 'MyInjector' contains: { "UserService": "[object Object]", ... }
-```
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## TODO:
 
