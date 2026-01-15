@@ -145,6 +145,28 @@ injector.registerProvider({
 });
 ```
 
+### Multi-providers
+
+For providing multiple values for the same token:
+
+```ts
+const VALIDATOR = new InjectionToken<Validator[]>("VALIDATOR");
+
+injector.registerProvider({
+    token: VALIDATOR,
+    useClass: RequiredValidator,
+    multi: true,
+});
+
+injector.registerProvider({
+    token: VALIDATOR,
+    useClass: EmailValidator,
+    multi: true,
+});
+
+const validators = injector.get(VALIDATOR); // [RequiredValidator instance, EmailValidator instance]
+```
+
 ## Scopes
 
 Control the lifetime of your services:
@@ -245,6 +267,8 @@ class UserService {
 }
 ```
 
+Function-based injection works correctly even across asynchronous boundaries (using `AsyncLocalStorage`).
+
 ## Hierarchical Injectors
 
 Create parent-child relationships between injectors:
@@ -307,10 +331,10 @@ injector.printDebug();
 ```
 
 ## TODO:
-
+- [ ] add support for abstract types as token
 - [ ] async injector
-- [ ] Handle circular dependencies
+- [x] Handle circular dependencies
 - [x] add useExisting provider
-- [ ] Support for async hooks support
-- [ ] support for multiple instances of the same value
+- [x] Support for async hooks support
+- [x] support for multiple instances of the same value
 - [x] add scope support

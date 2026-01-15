@@ -10,4 +10,6 @@ export const Errors = {
 
         return `Cannot resolve parameters of ${StringifyProviderToken(token)}(${msg})`;
     },
+    CIRCULAR_DEPENDENCY: (stack: ProviderToken[]) =>
+        `Circular dependency detected: ${stack.map(StringifyProviderToken).join(" -> ")}`,
 };

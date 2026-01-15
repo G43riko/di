@@ -72,6 +72,8 @@ interface CoreCustomProvider<T = any> {
     readonly token: ProviderToken;
     /** Optional scope that determines the lifetime of the provider */
     readonly scope?: Scope;
+    /** Whether this provider should be part of a multi-provider */
+    readonly multi?: boolean;
 }
 
 /**
