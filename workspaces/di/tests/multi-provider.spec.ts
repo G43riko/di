@@ -17,7 +17,7 @@ describe("MultiProvider", () => {
         expect(colors).toEqual(["red", "blue"]);
     });
 
-    it("Shoould test providers with classes", () => {
+    it("Should test providers with classes", () => {
         abstract class Handler {
             abstract handle(): string;
         }

@@ -245,7 +245,7 @@ export class SimpleInjector implements Injector {
      */
     public require<T>(token: ProviderToken<T>): TypeResolution<T> {
         const resolution = this.get(token);
-        if (resolution) {
+        if (typeof resolution !== "undefined" && resolution !== null) {
             return resolution;
         }
 
