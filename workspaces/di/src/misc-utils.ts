@@ -1,4 +1,4 @@
-export function GAssertRequire<T>(item: T | null | undefined, message = `Expected non-null value, but got ${item}`): T {
+export function GAssertRequire<T>(item: T | null | undefined, message = `Expected non-null value, but got '${item}'`): T {
     if (item === null || typeof item === "undefined") {
         throw new Error(message);
     }
