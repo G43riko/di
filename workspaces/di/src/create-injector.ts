@@ -20,6 +20,10 @@ export interface CreateInjectorParams {
      */
     readonly instantiateImmediately?: boolean;
     /**
+     * Dont throw but just ingore overriding prividers
+     */
+    readonly ignoreDuplicates?: boolean;
+    /**
      * If true, then successfully create injector with {@link instantiateImmediately} flag set to true even if there are unresolvable dependencies
      */
     readonly allowUnresolved?: boolean;
@@ -49,12 +53,13 @@ export function createInjector({
     providers = [],
     parentInjector = RootInjector,
     name,
+    ignoreDuplicates,
     ...params
 }: CreateInjectorParams): SimpleInjector {
     if (name === rootInjectorName) {
         throw new Error(`Injector name '${rootInjectorName}' is reserved for root injector`);
     }
-    const injector = new SimpleInjector(parentInjector, name);
+    const injector = new SimpleInjector(parentInjector, name, { ignoreDuplicates });
 
     if (strictMode) {
         for (const provider of providers) {
