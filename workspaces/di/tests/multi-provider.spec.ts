@@ -23,11 +23,15 @@ describe("MultiProvider", () => {
         }
 
         class HandlerA extends Handler {
-            handle() { return "A"; }
+            handle() {
+                return "A";
+            }
         }
 
         class HandlerB extends Handler {
-            handle() { return "B"; }
+            handle() {
+                return "B";
+            }
         }
 
         const HANDLERS = new InjectionToken<Handler[]>("HANDLERS");
@@ -46,11 +50,13 @@ describe("MultiProvider", () => {
     });
     it("Shoult throw error if not all providers have multi flag set to true", () => {
         const COLORS = new InjectionToken<string[]>("COLORS");
-        expect(() => createInjector({
-            providers: [
-                { token: COLORS, useValue: "red", multi: true },
-                { token: COLORS, useValue: "blue" },
-            ],
-        })).toThrow("multiple times")
-    })
-})
+        expect(() =>
+            createInjector({
+                providers: [
+                    { token: COLORS, useValue: "red", multi: true },
+                    { token: COLORS, useValue: "blue" },
+                ],
+            })
+        ).toThrow("multiple times");
+    });
+});

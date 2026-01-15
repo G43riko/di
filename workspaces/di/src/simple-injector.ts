@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { enableConstructorInjection, validateProviders } from "./config.ts";
-import { runWithInjector, setCurrentInjector } from "./current-injector.ts";
+import { runWithInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
 import { isInjectable, isTransientProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";

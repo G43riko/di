@@ -18,7 +18,7 @@ describe("AsyncContext", () => {
             const injector = createInjector({
                 providers: [
                     { token: TOKEN, useValue: "resolved" },
-                    MyService
+                    MyService,
                 ],
             });
 
@@ -26,7 +26,7 @@ describe("AsyncContext", () => {
                 const value1 = inject(TOKEN);
                 expect(value1).toBe("resolved");
 
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 10));
 
                 // This currently fails if another injector.runAsync was called in between,
                 // or simply because currentInjector was reset by finally block of runAsync
@@ -35,8 +35,8 @@ describe("AsyncContext", () => {
                 const value2 = inject(TOKEN);
                 expect(value2).toBe("resolved");
             });
-        })
-    })
+        });
+    });
     describe("Overlap", () => {
         it("Should fail when multiple async contexts overlap", async () => {
             const injector1 = createInjector({
@@ -51,18 +51,18 @@ describe("AsyncContext", () => {
             const results: string[] = [];
 
             const p1 = injector1.runAsync(async () => {
-                await new Promise(resolve => setTimeout(resolve, 10));
+                await new Promise((resolve) => setTimeout(resolve, 10));
                 results.push(inject<string>("T"));
             });
 
             const p2 = injector2.runAsync(async () => {
-                await new Promise(resolve => setTimeout(resolve, 20));
+                await new Promise((resolve) => setTimeout(resolve, 20));
                 results.push(inject<string>("T"));
             });
 
             await Promise.all([p1, p2]);
 
             expect(results).toEqual(["V1", "V2"]);
-        })
-    })
-})
+        });
+    });
+});

@@ -331,6 +331,7 @@ injector.printDebug();
 ```
 
 ## TODO:
+
 - [ ] add support for abstract types as token
 - [ ] async injector
 - [x] Handle circular dependencies
