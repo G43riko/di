@@ -167,7 +167,7 @@ const validators = injector.get(VALIDATOR); // [RequiredValidator instance, Emai
 
 ### Global Scope (Default)
 
-A single instance shared across all injectors.
+A single instance is shared across all injectors.
 
 ```ts
 @Injectable()
@@ -306,7 +306,7 @@ This project uses Deno tasks for development and maintenance.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
 
 ## TODO:
 

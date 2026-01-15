@@ -60,6 +60,7 @@ export class SimpleInjector implements Injector {
      *
      * @param parent - Optional parent injector to delegate resolution to when a token is not found in this injector
      * @param name - Optional name for this injector, used for debugging purposes
+     * @param options
      */
     public constructor(
         protected readonly parent?: Injector,
