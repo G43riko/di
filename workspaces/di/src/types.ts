@@ -158,17 +158,46 @@ export function StringifyProviderType<T>(type: ProviderType<T>): string {
     throw new Error(`Unknown provider type: ${JSON.stringify(type)}`);
 }
 
+/**
+ * Checks if a provider is a class provider.
+ *
+ * @template T - The type of the provider
+ * @param type - The provider to check
+ * @returns True if the provider uses `useClass`
+ */
 export function isClassProvider<T>(type: ProviderType<T>): type is ClassCustomProvider<T> {
     return "useClass" in type;
 }
 
+/**
+ * Checks if a provider is a value provider.
+ *
+ * @template T - The type of the provider
+ * @param type - The provider to check
+ * @returns True if the provider uses `useValue`
+ */
 export function isValueProvider<T>(type: ProviderType<T>): type is ValueCustomProvider<T> {
     return "useValue" in type;
 }
 
+/**
+ * Checks if a provider is an existing provider (alias).
+ *
+ * @template T - The type of the provider
+ * @param type - The provider to check
+ * @returns True if the provider uses `useExisting`
+ */
 export function isExistingProvider<T>(type: ProviderType<T>): type is ExistingCustomProvider<T> {
     return "useExisting" in type;
 }
+
+/**
+ * Checks if a provider is a factory provider.
+ *
+ * @template T - The type of the provider
+ * @param type - The provider to check
+ * @returns True if the provider uses a `factory` function
+ */
 export function isFactoryProvider<T>(type: ProviderType<T>): type is FactoryCustomProvider<T> {
     return "factory" in type;
 }

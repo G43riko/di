@@ -28,7 +28,7 @@ class RootInjectorClass extends SimpleInjector {
      */
     public override get<T>(token: ProviderToken<T>): TypeResolution<T> | undefined {
         const existingItem = super.get(token);
-        if (existingItem) {
+        if (existingItem !== undefined) {
             return existingItem;
         }
 

@@ -20,7 +20,7 @@ export interface CreateInjectorParams {
      */
     readonly instantiateImmediately?: boolean;
     /**
-     * Dont throw but just ingore overriding prividers
+     * Don't throw but just ignore duplicate providers
      */
     readonly ignoreDuplicates?: boolean;
     /**
