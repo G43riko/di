@@ -15,7 +15,8 @@ A lightweight, powerful dependency injection library for Deno applications, insp
 
 ## Overview
 
-This library provides a robust and flexible dependency injection system for Deno. It supports hierarchical injectors, multiple provider types, and different lifetime scopes, all with first-class TypeScript support.
+This library provides a robust and flexible dependency injection system for Deno. It supports hierarchical injectors,
+multiple provider types, and different lifetime scopes, all with first-class TypeScript support.
 
 ## Features
 
@@ -40,14 +41,14 @@ You can import the library directly from the workspace or via its entry point:
 import { createInjector, inject, Injectable } from "@g43/di";
 ```
 
-*Note: For production use, you would typically import from a published JSR or deno.land/x URL.*
+_Note: For production use, you would typically import from a published JSR or deno.land/x URL._
 
 ## Basic Usage
 
 ### Creating a Simple Service
 
 ```ts
-import { Injectable, createInjector } from "@g43/di";
+import { createInjector, Injectable } from "@g43/di";
 
 @Injectable()
 class UserService {

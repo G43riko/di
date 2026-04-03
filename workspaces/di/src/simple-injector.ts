@@ -65,7 +65,7 @@ export class SimpleInjector implements Injector {
     public constructor(
         protected readonly parent?: Injector,
         protected readonly name?: string,
-        private readonly options?: { readonly ignoreDuplicates?: boolean }
+        private readonly options?: { readonly ignoreDuplicates?: boolean },
     ) {
     }
 
@@ -130,8 +130,8 @@ export class SimpleInjector implements Injector {
                 } as InjectorEntry<unknown>);
                 return;
             }
-            if(this.options?.ignoreDuplicates) {
-                return
+            if (this.options?.ignoreDuplicates) {
+                return;
             }
             throw new Error(Errors.CANNOT_REGISTER_MULTIPLE_TIMES(token));
         }
@@ -227,7 +227,8 @@ export class SimpleInjector implements Injector {
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${type}' for token '${StringifyProviderToken(token)
+            `Cannot resolve provider type '${type}' for token '${
+                StringifyProviderToken(token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }
