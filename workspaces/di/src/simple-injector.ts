@@ -29,13 +29,13 @@ import {
  */
 export interface InjectorEntry<T> {
     /** The provider type(s) */
-    readonly type: ProviderType<T> | ProviderType<T>[];
+    readonly providerType: ProviderType<T> | ProviderType<T>[];
     /** The token used to identify this provider */
     readonly token: ProviderToken;
-    /** The resolved instance(s), if already created */
-    readonly resolution?: TypeResolution<T> | TypeResolution<T>[];
+    /** The cached resolved instance(s), if available */
+    readonly cachedResolution?: TypeResolution<T> | TypeResolution<T>[];
     /** Whether this is a multi-provider */
-    readonly multi?: boolean;
+    readonly isMulti?: boolean;
 }
 /**
  * Maps an array of provider tokens to their resolved types.
@@ -50,10 +50,11 @@ export type MapArray<T extends readonly ProviderToken[]> = {
  * SimpleInjector is the core implementation of the Injector interface.
  */
 export class SimpleInjector implements Injector {
-    /** Internal map of provider tokens to their entries */
-    protected readonly _holders: Map<ProviderToken<unknown>, InjectorEntry<unknown>> = new Map();
+    /** Maps provider tokens to their provider entries */
+    protected readonly _providerEntries: Map<ProviderToken<unknown>, InjectorEntry<unknown>> = new Map();
 
-    private readonly _resolutionStack: ProviderToken[] = [];
+    /** Stack of tokens currently being resolved (for circular dependency detection) */
+    private readonly _dependencyResolutionStack: ProviderToken[] = [];
 
     /**
      * Creates a new SimpleInjector instance.
@@ -77,17 +78,15 @@ export class SimpleInjector implements Injector {
      */
     public resolveAll(allowUnresolved = false): ProviderToken[] {
         const resolvedTokens: ProviderToken[] = [];
-        const method = allowUnresolved ? this.get.bind(this) : this.require.bind(this);
 
-        for (const [token] of this._holders.entries()) {
+        for (const [token] of this._providerEntries.entries()) {
             try {
-                method(token);
+                allowUnresolved ? this.get(token) : this.require(token);
                 resolvedTokens.push(token);
             } catch (error) {
                 if (!allowUnresolved) {
                     throw error;
                 }
-                // Skip unresolved tokens when allowUnresolved is true
             }
         }
 
@@ -118,15 +117,14 @@ export class SimpleInjector implements Injector {
         }
 
         const token = getTokenFromProvider(provider);
-        const multi = isCustomProvider(provider) && provider.multi === true;
+        const isMultiProvider = isCustomProvider(provider) && provider.multi === true;
+        const existingEntry = this._providerEntries.get(token) as InjectorEntry<T> | undefined;
 
-        const existing = this._holders.get(token) as InjectorEntry<T> | undefined;
-
-        if (existing) {
-            if (multi && existing.multi) {
-                this._holders.set(token, {
-                    ...existing,
-                    type: [...(existing.type as ProviderType<T>[]), provider],
+        if (existingEntry) {
+            if (isMultiProvider && existingEntry.isMulti) {
+                this._providerEntries.set(token, {
+                    ...existingEntry,
+                    providerType: [...(existingEntry.providerType as ProviderType<T>[]), provider],
                 } as InjectorEntry<unknown>);
                 return;
             }
@@ -136,10 +134,10 @@ export class SimpleInjector implements Injector {
             throw new Error(Errors.CANNOT_REGISTER_MULTIPLE_TIMES(token));
         }
 
-        this._holders.set(token, {
+        this._providerEntries.set(token, {
             token,
-            type: multi ? [provider] : provider,
-            multi,
+            providerType: isMultiProvider ? [provider] : provider,
+            isMulti: isMultiProvider,
         } as InjectorEntry<unknown>);
     }
 
@@ -182,62 +180,63 @@ export class SimpleInjector implements Injector {
             return resolved;
         }) as MapArray<T>;
     }
-    private getResolvedParams<T>(type: Type<T>): undefined | readonly unknown[] {
-        const parameters = Reflect.getMetadata("design:paramtypes", type);
-        if (!parameters) {
+
+    private getResolvedConstructorParams<T>(type: Type<T>): undefined | readonly unknown[] {
+        const constructorParamTypes = Reflect.getMetadata("design:paramtypes", type);
+        if (!constructorParamTypes) {
             return undefined;
         }
 
         if (!enableConstructorInjection) {
             throw new Error("Constructor parameters are disabled");
         }
-        const resolvedParams = this.resolveParameters(parameters);
 
-        if (resolvedParams.some((e: TypeResolution) => typeof e === "undefined")) {
+        const resolvedParams = this.resolveParameters(constructorParamTypes);
+
+        if (resolvedParams.some((param: TypeResolution) => typeof param === "undefined")) {
             throw new Error(Errors.CANNOT_RESOLVE_PARAMS(type, resolvedParams));
         }
 
         return resolvedParams;
     }
     private resolveTypeProvider<T>(type: Type<T>): T {
-        const resolvedParams = this.getResolvedParams(type);
-
+        const resolvedParams = this.getResolvedConstructorParams(type);
         return this.createClassInstance<T>(type, resolvedParams);
     }
 
-    private resolveInjectionTokenDefaultValue<T>(defaultValue: T | (() => T)): TypeResolution<T> {
+    private resolveInjectionTokenDefault<T>(defaultValue: T | (() => T)): TypeResolution<T> {
         if (typeof defaultValue !== "function") {
             return defaultValue;
         }
         return runWithInjector(this, () => (defaultValue as any)());
     }
 
-    private resolveProviderType<T>(type: ProviderType<T>, token: ProviderToken): TypeResolution<T> {
-        if (isType(type)) {
-            return this.resolveTypeProvider<T>(type);
+    private resolveProviderType<T>(providerType: ProviderType<T>, token: ProviderToken): TypeResolution<T> {
+        if (isType(providerType)) {
+            return this.resolveTypeProvider<T>(providerType);
         }
-        if (isCustomProvider(type)) {
-            return this.resolveCustomProvider(type);
+        if (isCustomProvider(providerType)) {
+            return this.resolveCustomProvider(providerType);
         }
 
         if (token instanceof InjectionToken) {
             const defaultValue = token.options?.defaultValue;
             if (defaultValue !== undefined) {
-                return this.resolveInjectionTokenDefaultValue(defaultValue);
+                return this.resolveInjectionTokenDefault(defaultValue);
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${type}' for token '${
+            `Cannot resolve provider type '${providerType}' for token '${
                 StringifyProviderToken(token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }
 
-    private resolveEntry<T>(data: InjectorEntry<T>): TypeResolution<T> | TypeResolution<T>[] {
-        if (Array.isArray(data.type)) {
-            return data.type.map((t) => this.resolveProviderType(t, data.token));
+    private resolveEntry<T>(entry: InjectorEntry<T>): TypeResolution<T> | TypeResolution<T>[] {
+        if (Array.isArray(entry.providerType)) {
+            return entry.providerType.map((providerType) => this.resolveProviderType(providerType, entry.token));
         }
-        return this.resolveProviderType(data.type, data.token);
+        return this.resolveProviderType(entry.providerType, entry.token);
     }
 
     /**
@@ -286,13 +285,13 @@ export class SimpleInjector implements Injector {
      * Includes all registered tokens and their resolved values.
      */
     public printDebug(): void {
-        const stringifyData = Object.fromEntries(
-            this._holders.entries().map(([token]) => {
+        const debugData = Object.fromEntries(
+            this._providerEntries.entries().map(([token]) => {
                 return [StringifyProviderToken(token), String(this.get(token))];
             }),
         );
         const injectorName = this.name ?? "SimpleInjector";
-        console.log(`Injector '${injectorName}' contains: ${JSON.stringify(stringifyData, null, 4)}`);
+        console.log(`Injector '${injectorName}' contains: ${JSON.stringify(debugData, null, 4)}`);
     }
 
     /**
@@ -304,50 +303,47 @@ export class SimpleInjector implements Injector {
      * @returns The resolved instance or undefined if the token cannot be resolved
      */
     public get<T>(token: ProviderToken<T>, ignoreParent = false): TypeResolution<T> | undefined {
-        if (this._resolutionStack.includes(token)) {
-            throw new Error(Errors.CIRCULAR_DEPENDENCY([...this._resolutionStack, token]));
+        if (this._dependencyResolutionStack.includes(token)) {
+            throw new Error(Errors.CIRCULAR_DEPENDENCY([...this._dependencyResolutionStack, token]));
         }
 
-        const holder = this._holders.get(token) as InjectorEntry<T>;
+        const entry = this._providerEntries.get(token) as InjectorEntry<T>;
 
-        if (!holder) {
+        if (!entry) {
             if (this.parent && !ignoreParent) {
-                const parentValue = this.parent.get(token);
-                if (parentValue !== undefined) {
-                    return parentValue;
+                const parentResolution = this.parent.get(token);
+                if (parentResolution !== undefined) {
+                    return parentResolution;
                 }
             }
-            // if we cannot find token in parent injector, we try to use a default value from InjectionToken
             if (token instanceof InjectionToken && token.options?.defaultValue !== undefined) {
-                return this.resolveInjectionTokenDefaultValue(token.options?.defaultValue);
+                return this.resolveInjectionTokenDefault(token.options?.defaultValue);
             }
             return undefined;
         }
 
-        if ("resolution" in holder) {
-            return holder.resolution as TypeResolution<T>;
+        if ("cachedResolution" in entry) {
+            return entry.cachedResolution as TypeResolution<T>;
         }
 
-        this._resolutionStack.push(token);
+        this._dependencyResolutionStack.push(token);
         try {
-            const newResolution = this.resolveEntry(holder);
+            const newResolution = this.resolveEntry(entry);
 
-            const isTransient = Array.isArray(holder.type)
-                ? holder.type.some(isTransientProviderType)
-                : isTransientProviderType(holder.type);
+            const isTransient = Array.isArray(entry.providerType)
+                ? entry.providerType.some(isTransientProviderType)
+                : isTransientProviderType(entry.providerType);
 
             if (!isTransient) {
-                const newHolder = {
-                    ...holder,
-                    resolution: newResolution,
+                const cachedEntry = {
+                    ...entry,
+                    cachedResolution: newResolution,
                 };
-
-                // For GLOBAL and INJECTOR scopes, we cache the resolution
-                this._holders.set(token, newHolder as InjectorEntry<unknown>);
+                this._providerEntries.set(token, cachedEntry as InjectorEntry<unknown>);
             }
             return newResolution as TypeResolution<T>;
         } finally {
-            this._resolutionStack.pop();
+            this._dependencyResolutionStack.pop();
         }
     }
 }
