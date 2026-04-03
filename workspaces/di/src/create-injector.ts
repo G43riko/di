@@ -15,17 +15,11 @@ export interface CreateInjectorParams {
     readonly name?: string;
     /** Parent injector to delegate resolution to when a token is not found in this injector */
     readonly parentInjector?: Injector;
-    /**
-     * If set to true, a create injector method creates instances of all providers immediately
-     */
+    /** If true, instantiate all providers immediately after registration */
     readonly instantiateImmediately?: boolean;
-    /**
-     * Don't throw but just ignore duplicate providers
-     */
+    /** If true, ignore duplicate provider registrations instead of throwing */
     readonly ignoreDuplicates?: boolean;
-    /**
-     * If true, then successfully create injector with {@link instantiateImmediately} flag set to true even if there are unresolvable dependencies
-     */
+    /** If true, allow instantiation even if some dependencies cannot be resolved */
     readonly allowUnresolved?: boolean;
 }
 
@@ -54,31 +48,51 @@ export function createInjector({
     parentInjector = RootInjector,
     name,
     ignoreDuplicates,
-    ...params
+    instantiateImmediately,
+    allowUnresolved,
 }: CreateInjectorParams): SimpleInjector {
     if (name === rootInjectorName) {
         throw new Error(`Injector name '${rootInjectorName}' is reserved for root injector`);
     }
+
     const injector = new SimpleInjector(parentInjector, name, { ignoreDuplicates });
 
-    if (strictMode) {
-        for (const provider of providers) {
-            if (isGlobalProviderType(provider)) {
-                throw new Error(`${injector} can't register global provider ${StringifyProviderType(provider)}`);
-            }
+    validateProvidersInStrictMode(injector, providers);
+    registerProviders(injector, providers);
+
+    if (instantiateImmediately) {
+        injector.resolveAll(allowUnresolved);
+    }
+
+    return injector;
+}
+
+/**
+ * Validates that no global providers are being registered in strict mode.
+ * @throws Error if a global provider is detected in strict mode outside the root injector
+ */
+function validateProvidersInStrictMode(injector: SimpleInjector, providers: readonly ProviderType<unknown>[]): void {
+    if (!strictMode) {
+        return;
+    }
+
+    for (const provider of providers) {
+        if (isGlobalProviderType(provider)) {
+            throw new Error(`${injector} can't register global provider ${StringifyProviderType(provider)}`);
         }
     }
-    providers.forEach((provider) => {
+}
+
+/**
+ * Registers all providers with either the root injector (for global providers)
+ * or the local injector (for non-global providers).
+ */
+function registerProviders(injector: SimpleInjector, providers: readonly ProviderType<unknown>[]): void {
+    for (const provider of providers) {
         if (isGlobalProviderType(provider)) {
             RootInjector.registerProvider(provider);
         } else {
             injector.registerProvider(provider);
         }
-    });
-
-    if (params.instantiateImmediately) {
-        injector.resolveAll(params.allowUnresolved);
     }
-
-    return injector;
 }

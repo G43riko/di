@@ -2,13 +2,13 @@ import { rootInjectorName } from "./config.ts";
 import { isGlobalProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
 import { SimpleInjector } from "./simple-injector.ts";
-import { isType, type ProviderToken, type TypeResolution } from "./types.ts";
+import { isType, type ProviderToken, type ProviderType, type TypeResolution } from "./types.ts";
 
 /**
  * Special implementation of SimpleInjector that serves as the root container for all global providers.
  * This class automatically registers global providers when they are requested.
  */
-class RootInjectorClass extends SimpleInjector {
+class RootInjectorImpl extends SimpleInjector {
     /**
      * Creates the root injector with a predefined name.
      */
@@ -18,7 +18,7 @@ class RootInjectorClass extends SimpleInjector {
 
     /**
      * Overrides the get method to automatically register global providers when they are requested.
-     * Also, handles required InjectionTokens.
+     * Also handles required InjectionTokens.
      *
      * @template T - The type of the provider
      * @param token - The token to resolve
@@ -27,31 +27,44 @@ class RootInjectorClass extends SimpleInjector {
      * @throws Error for unsupported token types
      */
     public override get<T>(token: ProviderToken<T>): TypeResolution<T> | undefined {
-        const existingItem = super.get(token);
-        if (existingItem !== undefined) {
-            return existingItem;
+        const cachedInstance = super.get(token);
+        if (cachedInstance !== undefined) {
+            return cachedInstance;
         }
 
         if (isType(token)) {
-            const isGlobal = isGlobalProviderType(token);
-
-            if (isGlobal) {
-                this.registerProvider(token);
-
-                return super.get(token, true);
-            } else {
-                // we are in get method, so we just return undefined
-                return;
-            }
+            return this.resolveTypeToken(token);
         }
+
         if (token instanceof InjectionToken) {
-            if (token.options.required) {
-                throw new Error(`${token} is required but not found`);
-            }
-            return undefined;
+            return this.resolveInjectionToken(token);
         }
 
-        throw new Error("Not implemented");
+        throw new Error("Unsupported token type for resolution");
+    }
+
+    /**
+     * Attempts to resolve a type token, auto-registering global providers if needed.
+     */
+    private resolveTypeToken<T>(token: ProviderType<T>): TypeResolution<T> | undefined {
+        const isGlobal = isGlobalProviderType(token);
+
+        if (isGlobal) {
+            this.registerProvider(token);
+            return super.get(token, true);
+        }
+
+        return undefined;
+    }
+
+    /**
+     * Attempts to resolve an injection token, throwing if required but not found.
+     */
+    private resolveInjectionToken<T>(token: InjectionToken<T>): TypeResolution<T> | undefined {
+        if (token.options.required) {
+            throw new Error(`${token} is required but not found`);
+        }
+        return undefined;
     }
 }
 
@@ -68,4 +81,4 @@ class RootInjectorClass extends SimpleInjector {
  * RootInjector.registerProvider({ token: 'API_URL', useValue: 'https://api.example.com' });
  * ```
  */
-export const RootInjector: SimpleInjector = new RootInjectorClass();
+export const RootInjector: SimpleInjector = new RootInjectorImpl();

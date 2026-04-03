@@ -60,7 +60,7 @@ export type ProviderType<T = any> = Type<T> | CustomProvider<T>;
  *
  * @template T - The type associated with the token
  */
-export type ProviderToken<T = any> = symbol | Type<T> | string | InjectionToken<T>;
+export type ProviderToken<T = any> = symbol | ProviderType<T> | string | InjectionToken<T>;
 
 /**
  * Base interface for all custom provider configurations.
