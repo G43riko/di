@@ -11,7 +11,6 @@ import {
     isClassProvider,
     isCustomProvider,
     isExistingProvider,
-    isFactoryProvider,
     isType,
     isValueProvider,
     type ProviderToken,
@@ -157,18 +156,13 @@ export class SimpleInjector implements Injector {
             return this.require(provider.useExisting);
         }
 
-        if (isFactoryProvider(provider)) {
-            if (provider.deps?.length) {
-                return provider.factory(
-                    ...this.resolveParameters(provider.deps),
-                );
-            }
-            return provider.factory();
+        // provider is narrowed to FactoryCustomProvider<T> here
+        if (provider.deps?.length) {
+            return provider.factory(
+                ...this.resolveParameters(provider.deps),
+            );
         }
-
-        throw new Error(
-            `Cannot resolve custom provider: ${StringifyProviderType(provider)}. Invalid provider configuration.`,
-        );
+        return provider.factory();
     }
 
     private resolveParameters<T extends readonly ProviderToken[]>(parameters: T): MapArray<T> {

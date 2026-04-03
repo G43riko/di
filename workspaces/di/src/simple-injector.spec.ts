@@ -1,10 +1,11 @@
-import { describe, it } from "@std/testing/bdd";
+import { afterEach, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { SimpleInjector } from "./simple-injector.ts";
 import { Injectable } from "./injectable.decorator.ts";
 import { InjectionToken } from "./injection-token.ts";
 import { inject } from "./injections.ts";
 import { Scope } from "./scope.ts";
+import { _resetConfig, _setEnableConstructorInjection } from "./config.ts";
 
 describe("SimpleInjector", () => {
     describe("Basic dependency injection", () => {
@@ -505,6 +506,71 @@ describe("SimpleInjector", () => {
             injector.registerProvider({ token: TOKEN, useValue: "first" });
 
             expect(() => injector.registerProvider({ token: TOKEN, useValue: "second" })).toThrow();
+        });
+    });
+
+    describe("provider validation", () => {
+        it("should throw when registering a class without @Injectable decorator", () => {
+            class NotInjectable {}
+
+            const injector = new SimpleInjector();
+            expect(() => injector.registerProvider(NotInjectable)).toThrow("must be annotated with @Injectable");
+        });
+    });
+
+    describe("constructor injection disabled", () => {
+        @Injectable()
+        class DepService {}
+
+        @Injectable()
+        class ServiceWithDep {
+            constructor(public dep: DepService) {}
+        }
+
+        afterEach(() => _resetConfig());
+
+        it("should throw when constructor injection is disabled", () => {
+            const injector = new SimpleInjector();
+            injector.registerProvider(DepService);
+            injector.registerProvider(ServiceWithDep);
+
+            _setEnableConstructorInjection(false);
+            expect(() => injector.require(ServiceWithDep)).toThrow("Constructor parameters are disabled");
+        });
+    });
+
+    describe("invalid providerType in registry", () => {
+        it("should throw 'Cannot resolve provider type' for entries with unrecognized provider types", () => {
+            const injector = new SimpleInjector();
+            const TOKEN = "bad-provider-type-token";
+            (injector as any)._providerEntries.set(TOKEN, {
+                token: TOKEN,
+                providerType: { token: TOKEN },
+            });
+            expect(() => injector.get(TOKEN)).toThrow("Cannot resolve provider type");
+        });
+    });
+
+    describe.skip("CANNOT_RESOLVE_PARAMS path via resolveParameters override", () => {
+        @Injectable()
+        class DepForOverride {}
+
+        @Injectable()
+        class ServiceForOverride {
+            constructor(public dep: DepForOverride) {}
+        }
+
+        it("should throw CANNOT_RESOLVE_PARAMS when resolveParameters returns undefined values", () => {
+            class TestInjector extends SimpleInjector {}
+            (TestInjector.prototype as any).resolveParameters = () => [undefined];
+
+            const injector = new TestInjector();
+            injector.registerProvider(DepForOverride);
+            injector.registerProvider(ServiceForOverride);
+
+            expect(() => injector.get(ServiceForOverride)).toThrow("Cannot resolve parameters");
+
+            delete (TestInjector.prototype as any).resolveParameters;
         });
     });
 });

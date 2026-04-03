@@ -1,8 +1,38 @@
-import { describe, it } from "@std/testing/bdd";
+import { afterEach, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { Injectable } from "./injectable.decorator.ts";
 import { createInjector } from "./create-injector.ts";
-import { rootInjectorName } from "./config.ts";
+import { _resetConfig, _setStrictMode, rootInjectorName } from "./config.ts";
+
+describe("createInjector strict mode", () => {
+    afterEach(() => _resetConfig());
+
+    it("should throw when a global provider is registered in strict mode", () => {
+        @Injectable()
+        class StrictGlobalService {}
+
+        _setStrictMode(true);
+        expect(() => createInjector({ providers: [StrictGlobalService] })).toThrow();
+    });
+
+    it("should not throw when only non-global providers are used in strict mode", () => {
+        @Injectable.injector()
+        class LocalService {}
+
+        _setStrictMode(true);
+        expect(() => createInjector({ providers: [LocalService] })).not.toThrow();
+    });
+});
+
+describe("createInjector global providers", () => {
+    it("should route global providers to RootInjector", () => {
+        @Injectable()
+        class GlobalInProvidersList {}
+
+        const injector = createInjector({ providers: [GlobalInProvidersList] });
+        expect(injector.get(GlobalInProvidersList)).toBeInstanceOf(GlobalInProvidersList);
+    });
+});
 
 describe("createInjector", () => {
     @Injectable.injector()
@@ -20,6 +50,21 @@ describe("createInjector", () => {
     }
     it("Should throw if injector with roots name is creating", () => {
         expect(() => createInjector({ name: rootInjectorName })).toThrow();
+    });
+    it("should resolve all when instantiateImmediately and allowUnresolved are true", () => {
+        const injector = createInjector({
+            providers: [ServiceA],
+            instantiateImmediately: true,
+            allowUnresolved: true,
+        });
+        expect(injector.get(ServiceA)).toBeInstanceOf(ServiceA);
+    });
+    it("should instantiate all providers when instantiateImmediately is true", () => {
+        const injector = createInjector({
+            providers: [ServiceA],
+            instantiateImmediately: true,
+        });
+        expect(injector.get(ServiceA)).toBeInstanceOf(ServiceA);
     });
     describe("create injector with valid service with no providers", () => {
         const injectorWithServiceA = createInjector({

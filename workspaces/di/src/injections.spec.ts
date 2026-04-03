@@ -1,9 +1,21 @@
-import { describe, it } from "@std/testing/bdd";
+import { afterEach, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { Injectable } from "./injectable.decorator.ts";
 import { RootInjector } from "./root-injector.ts";
 import { inject } from "./injections.ts";
 import { createInjector } from "./create-injector.ts";
+import { InjectionToken } from "./injection-token.ts";
+import { _resetConfig, _setEnableInject } from "./config.ts";
+
+describe("inject() feature flag", () => {
+    afterEach(() => _resetConfig());
+
+    it("should throw 'inject is disabled' when enableInject is false", () => {
+        _setEnableInject(false);
+        const TOKEN = new InjectionToken<string>("inject-flag-test-token");
+        expect(() => inject(TOKEN)).toThrow("inject is disabled");
+    });
+});
 
 describe("Injections", () => {
     @Injectable()

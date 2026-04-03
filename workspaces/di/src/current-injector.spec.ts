@@ -1,7 +1,47 @@
-import { describe, it } from "@std/testing/bdd";
+import { afterEach, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { Injectable } from "./injectable.decorator.ts";
 import { createInjector } from "./create-injector.ts";
+import { requireCurrentInjector, setCurrentInjector } from "./current-injector.ts";
+import { SimpleInjector } from "./simple-injector.ts";
+
+describe("setCurrentInjector / requireCurrentInjector", () => {
+    afterEach(() => {
+        setCurrentInjector(undefined);
+    });
+
+    it("should set the global injector and retrieve it via requireCurrentInjector", () => {
+        const injector = new SimpleInjector();
+        setCurrentInjector(injector);
+        expect(requireCurrentInjector()).toBe(injector);
+    });
+
+    it("should return the previous injector when calling setCurrentInjector", () => {
+        const injector1 = new SimpleInjector();
+        const injector2 = new SimpleInjector();
+        setCurrentInjector(injector1);
+        const prev = setCurrentInjector(injector2);
+        expect(prev).toBe(injector1);
+    });
+
+    it("should return undefined as the previous injector when none was set", () => {
+        const injector = new SimpleInjector();
+        const prev = setCurrentInjector(injector);
+        expect(prev).toBeUndefined();
+    });
+
+    it("should throw when requireCurrentInjector is called with no injector set", () => {
+        expect(() => requireCurrentInjector()).toThrow();
+    });
+
+    it("should clear the global injector when set to undefined", () => {
+        const injector = new SimpleInjector();
+        setCurrentInjector(injector);
+        setCurrentInjector(undefined);
+        expect(() => requireCurrentInjector()).toThrow();
+    });
+});
+
 describe("createInjector", () => {
     @Injectable.injector()
     class ServiceA {}

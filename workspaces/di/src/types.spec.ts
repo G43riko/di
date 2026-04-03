@@ -194,6 +194,17 @@ describe("Types", () => {
             expect(StringifyProviderType(provider)).toBe(`FactoryProvider[${factory}]`);
         });
 
+        it("returns 'Anonymous Class' for anonymous class provider", () => {
+            const AnonymousClass = (() => class {})();
+            expect(StringifyProviderType(AnonymousClass as any)).toBe("Anonymous Class");
+        });
+
+        it("stringifies class provider with anonymous useClass", () => {
+            const AnonymousClass = (() => class {})();
+            const provider = { token: "T", useClass: AnonymousClass };
+            expect(StringifyProviderType(provider as any)).toBe("ClassProvider[Anonymous Class]");
+        });
+
         it("throws on unknown provider", () => {
             expect(() => StringifyProviderType({ token: "T" } as any)).toThrow(/Unknown provider type/);
         });
