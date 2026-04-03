@@ -222,7 +222,7 @@ export class SimpleInjector implements Injector {
 
         if (token instanceof InjectionToken) {
             const defaultValue = token.options?.defaultValue;
-            if (defaultValue) {
+            if (defaultValue !== undefined) {
                 return this.resolveInjectionTokenDefaultValue(defaultValue);
             }
         }
@@ -249,7 +249,7 @@ export class SimpleInjector implements Injector {
      */
     public require<T>(token: ProviderToken<T>): TypeResolution<T> {
         const resolution = this.get(token);
-        if (typeof resolution !== "undefined" && resolution !== null) {
+        if (resolution !== undefined) {
             return resolution;
         }
 
@@ -317,13 +317,13 @@ export class SimpleInjector implements Injector {
                 }
             }
             // if we cannot find token in parent injector, we try to use a default value from InjectionToken
-            if (token instanceof InjectionToken && token.options?.defaultValue) {
+            if (token instanceof InjectionToken && token.options?.defaultValue !== undefined) {
                 return this.resolveInjectionTokenDefaultValue(token.options?.defaultValue);
             }
             return undefined;
         }
 
-        if (holder.resolution) {
+        if ("resolution" in holder) {
             return holder.resolution as TypeResolution<T>;
         }
 

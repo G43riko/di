@@ -350,4 +350,161 @@ describe("SimpleInjector", () => {
             expect(instance1.id).toBe(instance2.id);
         });
     });
+
+    describe("Falsy provider values", () => {
+        it("should return null from a value provider via get()", () => {
+            const TOKEN = new InjectionToken<null>("null-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: null });
+
+            expect(injector.get(TOKEN)).toBeNull();
+        });
+
+        it("should return null from a value provider via require()", () => {
+            const TOKEN = new InjectionToken<null>("null-token-require");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: null });
+
+            expect(injector.require(TOKEN)).toBeNull();
+        });
+
+        it("should return 0 from a value provider", () => {
+            const TOKEN = new InjectionToken<number>("zero-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: 0 });
+
+            expect(injector.get(TOKEN)).toBe(0);
+            expect(injector.require(TOKEN)).toBe(0);
+        });
+
+        it("should return false from a value provider", () => {
+            const TOKEN = new InjectionToken<boolean>("false-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: false });
+
+            expect(injector.get(TOKEN)).toBe(false);
+            expect(injector.require(TOKEN)).toBe(false);
+        });
+
+        it("should return empty string from a value provider", () => {
+            const TOKEN = new InjectionToken<string>("empty-string-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: "" });
+
+            expect(injector.get(TOKEN)).toBe("");
+            expect(injector.require(TOKEN)).toBe("");
+        });
+
+        it("should cache a falsy resolved value and not re-resolve", () => {
+            let callCount = 0;
+            const TOKEN = new InjectionToken<number>("factory-zero");
+            const injector = new SimpleInjector();
+            injector.registerProvider({
+                token: TOKEN,
+                factory: () => {
+                    callCount++;
+                    return 0;
+                },
+            });
+
+            injector.get(TOKEN);
+            injector.get(TOKEN);
+            expect(callCount).toBe(1);
+        });
+
+        it("should use a falsy InjectionToken defaultValue of 0", () => {
+            const TOKEN = new InjectionToken<number>("default-zero", { defaultValue: 0 });
+            const injector = new SimpleInjector();
+
+            expect(injector.get(TOKEN)).toBe(0);
+        });
+
+        it("should use a falsy InjectionToken defaultValue of false", () => {
+            const TOKEN = new InjectionToken<boolean>("default-false", { defaultValue: false });
+            const injector = new SimpleInjector();
+
+            expect(injector.get(TOKEN)).toBe(false);
+        });
+
+        it("should use a falsy InjectionToken defaultValue of empty string", () => {
+            const TOKEN = new InjectionToken<string>("default-empty-string", { defaultValue: "" });
+            const injector = new SimpleInjector();
+
+            expect(injector.get(TOKEN)).toBe("");
+        });
+    });
+
+    describe("printDebug", () => {
+        it("should print debug information without throwing", () => {
+            @Injectable()
+            class DebugService {}
+
+            const injector = new SimpleInjector(undefined, "DebugInjector");
+            injector.registerProvider(DebugService);
+
+            const logs: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                logs.push(args.join(" "));
+            };
+            try {
+                injector.printDebug();
+            } finally {
+                console.log = originalLog;
+            }
+
+            expect(logs.length).toBe(1);
+            expect(logs[0]).toContain("DebugInjector");
+        });
+
+        it("should use 'SimpleInjector' as default name in printDebug", () => {
+            const TOKEN = new InjectionToken<string>("debug-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: "hello" });
+
+            const logs: string[] = [];
+            const originalLog = console.log;
+            console.log = (...args: unknown[]) => {
+                logs.push(args.join(" "));
+            };
+            try {
+                injector.printDebug();
+            } finally {
+                console.log = originalLog;
+            }
+
+            expect(logs[0]).toContain("SimpleInjector");
+        });
+    });
+
+    describe("ignoreDuplicates option", () => {
+        it("should not throw when registering duplicate providers with ignoreDuplicates=true", () => {
+            @Injectable()
+            class DupService {
+                public value = "original";
+            }
+
+            const injector = new SimpleInjector(undefined, undefined, { ignoreDuplicates: true });
+            injector.registerProvider(DupService);
+
+            expect(() => injector.registerProvider(DupService)).not.toThrow();
+        });
+
+        it("should keep the first registration when ignoreDuplicates=true", () => {
+            const TOKEN = new InjectionToken<string>("dup-token");
+            const injector = new SimpleInjector(undefined, undefined, { ignoreDuplicates: true });
+            injector.registerProvider({ token: TOKEN, useValue: "first" });
+            injector.registerProvider({ token: TOKEN, useValue: "second" });
+
+            expect(injector.require(TOKEN)).toBe("first");
+        });
+
+        it("should throw when registering duplicate providers without ignoreDuplicates", () => {
+            const TOKEN = new InjectionToken<string>("dup-throw-token");
+            const injector = new SimpleInjector();
+            injector.registerProvider({ token: TOKEN, useValue: "first" });
+
+            expect(() => injector.registerProvider({ token: TOKEN, useValue: "second" })).toThrow();
+        });
+    });
 });

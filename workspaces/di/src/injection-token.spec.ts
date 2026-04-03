@@ -50,4 +50,33 @@ describe("InjectionToken", () => {
         });
         expect(injector.get(TOKEN)).toBe(3);
     });
+
+    it("should return correct string from toString()", () => {
+        const TOKEN = new InjectionToken("MY_TOKEN");
+        expect(TOKEN.toString()).toBe("InjectionToken[MY_TOKEN]");
+    });
+
+    it("should use falsy defaultValue of 0", () => {
+        const TOKEN = new InjectionToken<number>("ZERO", { defaultValue: 0 });
+        const injector = createInjector({ providers: [] });
+        expect(injector.get(TOKEN)).toBe(0);
+    });
+
+    it("should use falsy defaultValue of false", () => {
+        const TOKEN = new InjectionToken<boolean>("FALSE", { defaultValue: false });
+        const injector = createInjector({ providers: [] });
+        expect(injector.get(TOKEN)).toBe(false);
+    });
+
+    it("should use falsy defaultValue of empty string", () => {
+        const TOKEN = new InjectionToken<string>("EMPTY", { defaultValue: "" });
+        const injector = createInjector({ providers: [] });
+        expect(injector.get(TOKEN)).toBe("");
+    });
+
+    it("should use falsy defaultValue factory returning 0", () => {
+        const TOKEN = new InjectionToken<number>("FACTORY_ZERO", { defaultValue: () => 0 });
+        const injector = createInjector({ providers: [] });
+        expect(injector.get(TOKEN)).toBe(0);
+    });
 });

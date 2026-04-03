@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { getScope, isGlobalProviderType, isTransientProviderType, registerInjectable } from "./injectable.holder.ts";
+import { getScope, isGlobalProviderType, isInjectable, isTransientProviderType, registerInjectable } from "./injectable.holder.ts";
 import { Scope } from "./scope.ts";
 import { Injectable } from "./injectable.decorator.ts";
 
@@ -184,6 +184,42 @@ describe("Injectable Holder", () => {
             expect(isTransientProviderType(TransientService)).toBe(true);
             expect(isGlobalProviderType(InjectorService)).toBe(false);
             expect(isTransientProviderType(InjectorService)).toBe(false);
+        });
+    });
+
+    describe("isInjectable", () => {
+        it("should return false for a plain class", () => {
+            class PlainService {}
+
+            expect(isInjectable(PlainService)).toBe(false);
+        });
+
+        it("should return true after registerInjectable is called", () => {
+            class ManuallyRegistered {}
+
+            registerInjectable(ManuallyRegistered, { scope: Scope.GLOBAL });
+            expect(isInjectable(ManuallyRegistered)).toBe(true);
+        });
+
+        it("should return true for classes decorated with @Injectable()", () => {
+            @Injectable()
+            class DecoratedService {}
+
+            expect(isInjectable(DecoratedService)).toBe(true);
+        });
+
+        it("should return true for classes decorated with @Injectable.transient()", () => {
+            @Injectable.transient()
+            class TransientDecorated {}
+
+            expect(isInjectable(TransientDecorated)).toBe(true);
+        });
+
+        it("should return true for classes decorated with @Injectable.injector()", () => {
+            @Injectable.injector()
+            class InjectorDecorated {}
+
+            expect(isInjectable(InjectorDecorated)).toBe(true);
         });
     });
 });
