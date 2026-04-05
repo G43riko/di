@@ -78,16 +78,19 @@ export class SimpleInjector implements Injector {
     public resolveAll(allowUnresolved = false): ProviderToken[] {
         const resolvedTokens: ProviderToken[] = [];
 
-        for (const [token] of this._providerEntries.entries()) {
-            try {
-                allowUnresolved ? this.get(token) : this.require(token);
-                resolvedTokens.push(token);
-            } catch (error) {
-                if (!allowUnresolved) {
-                    throw error;
+        // we have to run resolution in the context of this injector to allow resolving dependencies of providers during instantiation
+        this.run(() => {
+            for (const [token] of this._providerEntries.entries()) {
+                try {
+                    allowUnresolved ? this.get(token) : this.require(token);
+                    resolvedTokens.push(token);
+                } catch (error) {
+                    if (!allowUnresolved) {
+                        throw error;
+                    }
                 }
             }
-        }
+        })
 
         return resolvedTokens;
     }
@@ -220,8 +223,7 @@ export class SimpleInjector implements Injector {
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${providerType}' for token '${
-                StringifyProviderToken(token)
+            `Cannot resolve provider type '${providerType}' for token '${StringifyProviderToken(token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }
