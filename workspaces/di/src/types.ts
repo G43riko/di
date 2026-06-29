@@ -2,15 +2,15 @@ import { InjectionToken } from "./injection-token.ts";
 import { Scope } from "./scope.ts";
 
 /**
- * Checks if a value is a constructor function (Type).
+ * Checks if a value is a constructor function (Type or AbstractType).
  *
  * @param v - The value to check
  * @returns True if the value is a constructor function
  */
-export function isType(v: any): v is Type<any> {
+export function isType(v: any): v is Type<any> | AbstractType<any> {
     return typeof v === "function";
 }
-
+export type AbstractType<T = object> = abstract new (...args: any[]) => T;
 /**
  * Represents a constructor function type.
  *
@@ -48,19 +48,26 @@ export function getTokenFromProvider<T>(provider: ProviderType<T>): ProviderToke
 
 /**
  * Represents a provider that can be registered with an injector.
- * Can be either a class constructor or a custom provider configuration.
+ * Can be either a class constructor, an abstract class constructor, or a custom provider configuration.
  *
  * @template T - The type of the provider
  */
-export type ProviderType<T = any> = Type<T> | CustomProvider<T>;
+export type ProviderType<T = any> = Type<T> | AbstractType<T> | CustomProvider<T>;
 
 /**
  * Represents a token that can be used to identify a provider.
- * Can be a class constructor, a string, a symbol, or an InjectionToken.
+ * Can be a class constructor, an abstract class constructor, a string, a symbol, or an InjectionToken.
+ * Note: AbstractType<T> is listed before Type<T> to ensure proper type inference for abstract classes.
  *
  * @template T - The type associated with the token
  */
-export type ProviderToken<T = any> = symbol | ProviderType<T> | string | InjectionToken<T>;
+export type ProviderToken<T = any> =
+    | symbol
+    | AbstractType<T>
+    | Type<T>
+    | string
+    | InjectionToken<T>
+    | CustomProvider<T>;
 
 /**
  * Base interface for all custom provider configurations.
