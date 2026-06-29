@@ -166,7 +166,7 @@ const validators = injector.get(VALIDATOR); // [RequiredValidator instance, Emai
 
 ## Scopes
 
-### Global Scope (Default)
+### Global Scope
 
 A single instance is shared across all injectors.
 
@@ -179,7 +179,7 @@ class GlobalService {}
 class ExplicitGlobalService {}
 ```
 
-### Injector Scope
+### Injector Scope (Default)
 
 A new instance for each injector.
 

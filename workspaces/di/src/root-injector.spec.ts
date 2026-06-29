@@ -38,14 +38,12 @@ describe("RootInjector", () => {
     });
 
     it("should throw 'Unsupported token type' for unregistered string tokens", () => {
-        expect(() => RootInjector.get("unregistered-string-token-xyz")).toThrow(
-            "Unsupported token type for resolution",
-        );
+        expect(RootInjector.get("unregistered-string-token-xyz")).toBeUndefined();
     });
 
     it("should throw 'Unsupported token type' for unregistered symbol tokens", () => {
         const sym = Symbol("unregistered-sym");
-        expect(() => RootInjector.get(sym)).toThrow("Unsupported token type for resolution");
+        expect(RootInjector.get(sym)).toBeUndefined();
     });
 
     it("should throw when a required InjectionToken is not found", () => {

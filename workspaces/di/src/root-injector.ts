@@ -40,6 +40,10 @@ class RootInjectorImpl extends SimpleInjector {
             return this.resolveInjectionToken(token);
         }
 
+        if (typeof token === "string" || typeof token === "symbol") {
+            return undefined; // not found in root; no auto-registration possible
+        }
+
         throw new Error("Unsupported token type for resolution");
     }
 

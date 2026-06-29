@@ -90,6 +90,11 @@ function validateProvidersInStrictMode(injector: SimpleInjector, providers: read
 function registerProviders(injector: SimpleInjector, providers: readonly ProviderType<unknown>[]): void {
     for (const provider of providers) {
         if (isGlobalProviderType(provider)) {
+            console.warn(
+                `[DI] Provider '${
+                    StringifyProviderType(provider)
+                }' has GLOBAL scope and will be registered in RootInjector, not '${injector}'.`,
+            );
             RootInjector.registerProvider(provider);
         } else {
             injector.registerProvider(provider);
