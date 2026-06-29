@@ -53,7 +53,10 @@ export function inject<T>(token: ProviderToken<T>): TypeResolution<T> {
  * ```
  */
 inject.optional = function <T>(token: ProviderToken<T>): TypeResolution<T> | undefined {
-    const injector = requireCurrentInjector();
-
-    return injector.get(token);
+    try {
+        const injector = requireCurrentInjector();
+        return injector.get(token);
+    } catch {
+        return undefined;
+    }
 };

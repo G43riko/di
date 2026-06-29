@@ -236,8 +236,7 @@ export class SimpleInjector implements Injector {
             }
         }
         throw new Error(
-            `Cannot resolve provider type '${providerType}' for token '${
-                StringifyProviderToken(token)
+            `Cannot resolve provider type '${providerType}' for token '${StringifyProviderToken(token)
             }'. Make sure the provider is properly registered and all dependencies are available.`,
         );
     }
@@ -301,12 +300,13 @@ export class SimpleInjector implements Injector {
      */
     public printDebug(): void {
         const debugData = Object.fromEntries(
-            this._providerEntries.entries().map(([token]) => {
-                return [StringifyProviderToken(token), String(this.get(token))];
+            this._providerEntries.entries().map(([token, entry]) => {
+                const status = "cachedResolution" in entry ? `resolved: ${String(entry.cachedResolution)}` : "pending";
+                return [StringifyProviderToken(token), status];
             }),
         );
         const injectorName = this.name ?? "SimpleInjector";
-        console.log(`Injector '${injectorName}' contains: ${JSON.stringify(debugData, null, 4)}`);
+        console.log(`Injector '${injectorName}': ${JSON.stringify(debugData, null, 4)}`);
     }
 
     /**

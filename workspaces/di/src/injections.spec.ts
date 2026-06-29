@@ -52,7 +52,7 @@ describe("Injections", () => {
             expect(serviceA).toBeInstanceOf(ServiceA);
             expect(serviceB).toBeInstanceOf(ServiceB);
             expect(serviceB.serviceA).toBeInstanceOf(ServiceA);
-            expect(() => serviceB.testA()).toThrow();
+            expect(serviceB.testA()).toBeUndefined();
             expect(RootInjector.run(() => serviceB.testA())).toBeInstanceOf(ServiceA);
         });
     });
@@ -87,7 +87,7 @@ describe("Injections", () => {
                 expect(serviceE.serviceC).toBeInstanceOf(ServiceC);
             });
             it("throw if called injection outside of injection context", () => {
-                expect(() => serviceE.testD()).toThrow();
+                expect(serviceE.testD()).toBeUndefined();
                 expect(() => serviceE.testRequiredD()).toThrow();
             });
 
@@ -103,7 +103,7 @@ describe("Injections", () => {
             expect(serviceB).toBeInstanceOf(ServiceB);
             expect(serviceB.serviceA).toBeInstanceOf(ServiceA);
             // should throw because `inject` is called outside an injection context
-            expect(() => serviceB.testA()).toThrow();
+            expect(serviceB.testA()).toBeUndefined();
             expect(RootInjector.run(() => serviceB.testA())).toBeInstanceOf(ServiceA);
         });
     });
