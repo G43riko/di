@@ -1,4 +1,4 @@
-import { describe, it } from "@std/testing/bdd";
+import { describe, it } from "node:test";
 import { Injectable } from "../src/injectable.decorator.ts";
 import { expect } from "@std/expect";
 import { inject } from "../src/injections.ts";
