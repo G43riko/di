@@ -1,12 +1,40 @@
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { Injectable } from "./injectable.decorator.ts";
+import { Injectable, Service } from "./injectable.decorator.ts";
 import { Scope } from "./scope.ts";
 import { RootInjector } from "./root-injector.ts";
 import { createInjector } from "./create-injector.ts";
+import { inject } from "./injections.ts";
 
 describe("Injectable Decorator", () => {
     describe("Basic functionality", () => {
+        it("should provide Service as a global Injectable alias", () => {
+            @Service()
+            class TestService {}
+
+            const injector = createInjector({});
+
+            expect(injector.require(TestService)).toBe(RootInjector.require(TestService));
+        });
+
+        it("should create a Service with its factory in an injection context", () => {
+            @Service()
+            class Dependency {}
+
+            class FactoryService {
+                public dependency!: Dependency;
+            }
+
+            Service({
+                factory: () => Object.assign(new FactoryService(), { dependency: inject(Dependency) }),
+            })(FactoryService);
+
+            const instance = RootInjector.require(FactoryService);
+
+            expect(instance).toBeInstanceOf(FactoryService);
+            expect(instance.dependency).toBeInstanceOf(Dependency);
+        });
+
         it("should mark a class as injectable", () => {
             @Injectable()
             class TestService {}

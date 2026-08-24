@@ -2,6 +2,7 @@ import { describe, it } from "@std/testing/bdd";
 import { createInjector } from "../src/create-injector.ts";
 import { Injectable } from "../src/injectable.decorator.ts";
 import { expect } from "@std/expect";
+import { Scope } from "../src/scope.ts";
 
 @Injectable()
 class DepA {
@@ -53,6 +54,24 @@ const injector = createInjector({
 });
 
 describe("CustomDecorators", () => {
+    it("should reject non-global dependencies of global factory providers", () => {
+        @Injectable.injector()
+        class LocalDependency {}
+
+        const globalProvider = {
+            token: "GLOBAL_FACTORY",
+            factory: (_dependency: LocalDependency) => "value",
+            deps: [LocalDependency],
+            scope: Scope.GLOBAL,
+        };
+
+        injector.registerProvider(globalProvider);
+
+        expect(() => injector.require("GLOBAL_FACTORY")).toThrow(
+            "Global provider 'GLOBAL_FACTORY' cannot depend on non-global provider 'LocalDependency'",
+        );
+    });
+
     it("Should resolve all values", () => {
         expect(injector.get("CUSTOM_TOKEN_VALUE")).toBe("CUSTOM_VALUE");
         expect(injector.get("CUSTOM_CLASS_VALUE")).toBeInstanceOf(DepB);

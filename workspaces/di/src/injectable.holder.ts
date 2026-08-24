@@ -9,6 +9,8 @@ import { isCustomProvider, isType, type ProviderType, type Type } from "./types.
 export interface InjectableOptions {
     /** The scope that determines the lifetime of instances of this injectable */
     readonly scope: Scope;
+    /** Optional factory used to create the injectable */
+    readonly factory?: () => unknown;
 }
 
 interface InjectableHolder<T = any> {
@@ -75,6 +77,14 @@ export function isTransientProviderType<T>(token: ProviderType<T>): boolean {
  */
 export function isGlobalProviderType<T>(token: ProviderType<T>): boolean {
     return getScope(token) === Scope.GLOBAL;
+}
+
+export function getFactory(token: ProviderType): (() => unknown) | undefined {
+    if (isType(token)) {
+        return getSymbol(token, injectableDataSymbol)?.options.factory;
+    }
+
+    return undefined;
 }
 
 /**

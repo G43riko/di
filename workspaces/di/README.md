@@ -27,6 +27,7 @@ multiple provider types, and different lifetime scopes, all with first-class Typ
 - **Configurable Scopes**: `GLOBAL`, `INJECTOR`, and `TRANSIENT` scopes.
 - **Injection Tokens**: Support for non-class dependencies.
 - **Functional Injection**: Use `inject()` for more flexible dependency retrieval.
+- **Global Services**: Use `@Service()` for root singletons with `inject()` or a custom factory.
 - **Asynchronous Support**: Correctly handles asynchronous boundaries using `AsyncLocalStorage`.
 
 ## Requirements
@@ -38,7 +39,7 @@ multiple provider types, and different lifetime scopes, all with first-class Typ
 You can import the library directly from the workspace or via its entry point:
 
 ```ts
-import { createInjector, inject, Injectable } from "@g43/di";
+import { createInjector, inject, Injectable, Service } from "@g43/di";
 ```
 
 _Note: For production use, you would typically import from a published JSR or deno.land/x URL._
@@ -76,6 +77,53 @@ const injector = createInjector({
 const app = injector.get(AppComponent);
 app.displayUsers(); // Output: Users: ["Alice", "Bob", "Charlie"]
 ```
+
+### Creating a Global Service
+
+`@Service()` is the shorthand for a global singleton. Services cannot use constructor dependencies; use `inject()` in a
+property or method instead.
+
+```ts
+import { inject, Service } from "@g43/di";
+
+@Service()
+class UserService {
+    private readonly apiUrl = inject(API_URL);
+
+    getUsers() {
+        return fetch(`${this.apiUrl}/users`);
+    }
+}
+```
+
+Global services may only depend on global providers. Injecting an injector-scoped or transient provider into a service
+throws an error.
+
+### Service Factory
+
+Use the `factory` option when the service needs custom initialization or should choose between implementations. The
+factory runs in an injection context, so it can call `inject()`.
+
+```ts
+import { inject, Service } from "@g43/di";
+
+@Service({
+    factory: () => {
+        const enabled = inject(ENABLE_FILE_LOGGER);
+        return enabled ? new FileLogger() : new Logger();
+    },
+})
+class Logger {
+    log(...messages: string[]) {
+        console.log(...messages);
+    }
+}
+
+class FileLogger extends Logger {}
+```
+
+The factory replaces construction for that service. Keep using `@Injectable()` when constructor injection, non-global
+scopes, or advanced provider configurations are needed.
 
 ## Provider Types
 
@@ -171,13 +219,16 @@ const validators = injector.get(VALIDATOR); // [RequiredValidator instance, Emai
 A single instance is shared across all injectors.
 
 ```ts
-@Injectable()
+@Service()
 class GlobalService {}
 
 // Or explicitly
 @Injectable.global()
 class ExplicitGlobalService {}
 ```
+
+`@Service()` is equivalent to `@Injectable({ scope: Scope.GLOBAL })` and is intended for global services that use
+`inject()` or a factory.
 
 ### Injector Scope (Default)
 
@@ -255,6 +306,10 @@ class UserService {
 }
 ```
 
+For a global service, use `@Service()` instead of `@Injectable()` and do not add constructor parameters. Constructor
+dependencies on services are rejected so global services cannot accidentally capture injector-scoped or transient
+providers.
+
 ## Hierarchical Injectors
 
 ```ts
@@ -311,7 +366,6 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 ## TODO:
 
-- [ ] add support for abstract types as token
 - [ ] async injector
 - [x] Handle circular dependencies
 - [x] add useExisting provider

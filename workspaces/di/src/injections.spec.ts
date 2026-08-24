@@ -1,6 +1,6 @@
 import { afterEach, describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
-import { Injectable } from "./injectable.decorator.ts";
+import { Injectable, Service } from "./injectable.decorator.ts";
 import { RootInjector } from "./root-injector.ts";
 import { inject } from "./injections.ts";
 import { createInjector } from "./create-injector.ts";
@@ -18,6 +18,29 @@ describe("inject() feature flag", () => {
 });
 
 describe("Injections", () => {
+    it("should reject a non-global dependency of a Service", () => {
+        @Injectable.injector()
+        class LocalDependency {}
+        void LocalDependency;
+
+        expect(() => {
+            @Service()
+            class GlobalService {
+                constructor(public readonly dependency: LocalDependency) {}
+            }
+            void GlobalService;
+        }).toThrow("Service 'GlobalService' cannot have constructor dependencies; use inject() or a factory instead");
+
+        @Service()
+        class PropertyGlobalService {
+            public readonly dependency = inject(LocalDependency);
+        }
+
+        expect(() => RootInjector.require(PropertyGlobalService)).toThrow(
+            "Global provider 'PropertyGlobalService' cannot depend on non-global provider 'LocalDependency'",
+        );
+    });
+
     @Injectable()
     class ServiceA {}
 

@@ -1,5 +1,8 @@
+import "reflect-metadata";
 import { registerInjectable } from "./injectable.holder.ts";
 import { Scope } from "./scope.ts";
+import { Errors } from "./errors.ts";
+import type { Type } from "./types.ts";
 
 /**
  * Configuration options for the Injectable decorator.
@@ -77,7 +80,27 @@ const transient = createScopedDecorator(Scope.TRANSIENT);
  * }
  * ```
  */
-const global = createScopedDecorator(Scope.GLOBAL);
+const global: ReturnType<typeof createScopedDecorator> = createScopedDecorator(Scope.GLOBAL);
+
+export interface ServiceDecoratorParams<T = unknown> {
+    readonly factory?: () => T;
+}
+
+/**
+ * Decorator for a global service. Services use `inject()` or an optional factory
+ * instead of constructor-based dependency injection.
+ */
+export function Service<T extends Type>(params: ServiceDecoratorParams<InstanceType<T>> = {}): (constructor: T) => T {
+    return (constructor: T): T => {
+        const constructorParamTypes = Reflect.getMetadata("design:paramtypes", constructor);
+        if (constructorParamTypes?.length) {
+            throw new Error(Errors.SERVICE_CANNOT_HAVE_CONSTRUCTOR_PARAMS(constructor as any));
+        }
+
+        registerInjectable(constructor as any, { scope: Scope.GLOBAL, factory: params.factory });
+        return constructor;
+    };
+}
 
 /**
  * Decorator that marks a class as injectable with INJECTOR scope.

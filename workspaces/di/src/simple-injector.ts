@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { enableConstructorInjection, validateProviders } from "./config.ts";
 import { runWithInjector } from "./current-injector.ts";
 import { Errors } from "./errors.ts";
-import { isInjectable, isTransientProviderType } from "./injectable.holder.ts";
+import { getFactory, isGlobalProviderType, isInjectable, isTransientProviderType } from "./injectable.holder.ts";
 import { InjectionToken } from "./injection-token.ts";
 import type { Injector } from "./injector.ts";
 import {
@@ -51,6 +51,7 @@ export type MapArray<T extends readonly ProviderToken[]> = {
 export class SimpleInjector implements Injector {
     /** Maps provider tokens to their provider entries */
     private readonly _providerEntries: Map<ProviderToken<unknown>, InjectorEntry<unknown>> = new Map();
+    private readonly _resolutionOwners: (ProviderType | ProviderType[])[] = [];
 
     /** (Was an instance-level stack) Resolution stack is now passed per-call to avoid sharing across concurrent resolutions */
 
@@ -156,7 +157,7 @@ export class SimpleInjector implements Injector {
             return provider.useValue;
         }
         if (isClassProvider(provider)) {
-            return this.resolveTypeProvider(provider.useClass, _stack);
+            return this.resolveTypeProvider(provider.useClass, _stack, provider);
         }
 
         if (isExistingProvider(provider)) {
@@ -172,12 +173,37 @@ export class SimpleInjector implements Injector {
         return provider.factory();
     }
 
+    private isGlobalDependency(token: ProviderToken): boolean {
+        if (isGlobalProviderType(token as ProviderType)) {
+            return true;
+        }
+
+        const entry = this._providerEntries.get(token);
+        if (!entry) {
+            return false;
+        }
+
+        return Array.isArray(entry.providerType)
+            ? entry.providerType.every(isGlobalProviderType)
+            : isGlobalProviderType(entry.providerType);
+    }
+
+    private validateGlobalDependency(owner: ProviderType | ProviderType[], dependency: ProviderToken): void {
+        if (!Array.isArray(owner) && isGlobalProviderType(owner) && !this.isGlobalDependency(dependency)) {
+            const providerToken = isCustomProvider(owner) ? owner.token : owner;
+            throw new Error(Errors.GLOBAL_PROVIDER_DEPENDS_ON_NON_GLOBAL(providerToken, dependency));
+        }
+    }
+
     private resolveParameters<T extends readonly ProviderToken[]>(
         parameters: T,
         forToken?: ProviderToken,
         _stack: ProviderToken[] = [],
     ): MapArray<T> {
         return parameters.map((parameter: ProviderToken, index: number) => {
+            if (forToken) {
+                this.validateGlobalDependency(forToken as ProviderType, parameter);
+            }
             const resolved = this.get(parameter, false, _stack);
             if (resolved === undefined) {
                 const ctx = forToken ? ` (while resolving ${StringifyProviderToken(forToken)})` : "";
@@ -192,6 +218,7 @@ export class SimpleInjector implements Injector {
     private getResolvedConstructorParams<T>(
         type: Type<T>,
         _stack: ProviderToken[] = [],
+        forToken: ProviderToken = type,
     ): undefined | readonly unknown[] {
         const constructorParamTypes = Reflect.getMetadata("design:paramtypes", type);
         if (!constructorParamTypes) {
@@ -202,7 +229,7 @@ export class SimpleInjector implements Injector {
             throw new Error("Constructor parameters are disabled");
         }
 
-        const resolvedParams = this.resolveParameters(constructorParamTypes, type, _stack);
+        const resolvedParams = this.resolveParameters(constructorParamTypes, forToken, _stack);
 
         if (resolvedParams.some((param: TypeResolution) => typeof param === "undefined")) {
             throw new Error(Errors.CANNOT_RESOLVE_PARAMS(type, resolvedParams));
@@ -210,8 +237,17 @@ export class SimpleInjector implements Injector {
 
         return resolvedParams;
     }
-    private resolveTypeProvider<T>(type: Type<T>, _stack: ProviderToken[] = []): T {
-        const resolvedParams = this.getResolvedConstructorParams(type, _stack);
+    private resolveTypeProvider<T>(
+        type: Type<T>,
+        _stack: ProviderToken[] = [],
+        forToken: ProviderToken = type,
+    ): T {
+        const factory = getFactory(type);
+        if (factory) {
+            return runWithInjector(this, factory) as T;
+        }
+
+        const resolvedParams = this.getResolvedConstructorParams(type, _stack, forToken);
         return this.createClassInstance<T>(type, resolvedParams);
     }
 
@@ -334,6 +370,11 @@ export class SimpleInjector implements Injector {
             throw new Error(Errors.CIRCULAR_DEPENDENCY([..._stack, token]));
         }
 
+        const owner = this._resolutionOwners.at(-1);
+        if (owner) {
+            this.validateGlobalDependency(owner, token);
+        }
+
         const entry = this._providerEntries.get(token) as InjectorEntry<T>;
 
         if (!entry) {
@@ -354,6 +395,7 @@ export class SimpleInjector implements Injector {
         }
 
         _stack.push(token);
+        this._resolutionOwners.push(entry.providerType);
         try {
             const newResolution = this.resolveEntry(entry, _stack);
 
@@ -370,6 +412,7 @@ export class SimpleInjector implements Injector {
             }
             return newResolution as TypeResolution<T>;
         } finally {
+            this._resolutionOwners.pop();
             _stack.pop();
         }
     }

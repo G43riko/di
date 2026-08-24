@@ -10,6 +10,14 @@ export const Errors = {
 
         return `Cannot resolve parameters of ${StringifyProviderToken(token)}(${msg})`;
     },
+    GLOBAL_PROVIDER_DEPENDS_ON_NON_GLOBAL: (provider: ProviderToken, dependency: ProviderToken) =>
+        `Global provider '${StringifyProviderToken(provider)}' cannot depend on non-global provider '${
+            StringifyProviderToken(dependency)
+        }'`,
+    SERVICE_CANNOT_HAVE_CONSTRUCTOR_PARAMS: (provider: ProviderToken) =>
+        `Service '${
+            StringifyProviderToken(provider)
+        }' cannot have constructor dependencies; use inject() or a factory instead`,
     CIRCULAR_DEPENDENCY: (stack: ProviderToken[]) =>
         `Circular dependency detected: ${stack.map(StringifyProviderToken).join(" -> ")}`,
 };
