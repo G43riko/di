@@ -9,6 +9,7 @@ import {
 } from "./injectable.holder.ts";
 import { Scope } from "./scope.ts";
 import { Injectable } from "./injectable.decorator.ts";
+import { InjectionToken } from "./injection-token.ts";
 
 describe("Injectable Holder", () => {
     describe("registerInjectable", () => {
@@ -53,6 +54,12 @@ describe("Injectable Holder", () => {
             };
 
             expect(getScope(customProvider)).toBe(Scope.TRANSIENT);
+        });
+
+        it("should return the scope from an injection token", () => {
+            const token = new InjectionToken("GLOBAL", { scope: Scope.GLOBAL, defaultValue: "default" });
+
+            expect(getScope(token)).toBe(Scope.GLOBAL);
         });
 
         it("should return default scope for unregistered types", () => {

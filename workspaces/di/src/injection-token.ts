@@ -1,3 +1,5 @@
+import { Scope } from "./scope.ts";
+
 /**
  * A token that can be used to identify a dependency when the type is not available.
  * Useful for injecting primitive values, interfaces, or third-party services.
@@ -27,19 +29,36 @@ export class InjectionToken<T> {
      * @param options - Configuration options for the token
      * @param options.defaultValue - Optional default value to use if the token is not found in an injector
      * @param options.required - If true, injector.get(token) will throw if the token is not found
+     * @param options.scope - The scope of the token, defaulting to the injector scope
      */
     public constructor(
         public readonly name: string,
-        public readonly options: {
+        options: {
             /** Optional default value or factory function to use if the token is not found */
             readonly defaultValue?: T | (() => T);
             /**
              * If true, injector.get(token) will throw if a token is not found in an injector
              */
             readonly required?: boolean;
+            /** The scope of the token */
+            readonly scope?: Scope;
         } = {},
     ) {
+        if (options.scope === Scope.GLOBAL && options.defaultValue === undefined) {
+            throw new Error(`Global injection token '${this.name}' must have a defaultValue`);
+        }
+
+        this.options = {
+            ...options,
+            scope: options.scope ?? Scope.INJECTOR,
+        };
     }
+
+    public readonly options: {
+        readonly defaultValue?: T | (() => T);
+        readonly required?: boolean;
+        readonly scope: Scope;
+    };
 
     /**
      * Returns a string representation of this token for debugging purposes.

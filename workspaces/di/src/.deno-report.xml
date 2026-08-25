@@ -2,10 +2,10 @@
 <testsuites name="deno test" tests="2" failures="0" errors="0" time="0.008">
     <testsuite name="./injections.spec.ts" tests="2" disabled="2" errors="0" failures="0">
         <testcase name="inject() feature flag" classname="./injections.spec.ts" line="11" col="1">
-            <skipped/>
+            <skipped />
         </testcase>
         <testcase name="Injections" classname="./injections.spec.ts" line="21" col="1">
-            <skipped/>
+            <skipped />
         </testcase>
     </testsuite>
 </testsuites>

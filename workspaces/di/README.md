@@ -265,7 +265,7 @@ injector.registerProvider({
 ## Injection Tokens
 
 ```ts
-import { InjectionToken } from "@g43/di";
+import { InjectionToken, Scope } from "@g43/di";
 
 interface Config {
     apiUrl: string;
@@ -284,6 +284,26 @@ injector.registerProvider({
 const THEME = new InjectionToken<string>("THEME", {
     defaultValue: "light",
 });
+```
+
+Injection tokens use `Scope.INJECTOR` by default. They can be used as provider tokens with the default scope or with
+other non-global scopes.
+
+Global injection tokens are default-only tokens: they must define a `defaultValue` and cannot be used as the `token` in
+a provider configuration. Use a value or factory function when defining the default:
+
+```ts
+const APP_NAME = new InjectionToken<string>("APP_NAME", {
+    scope: Scope.GLOBAL,
+    defaultValue: "My App",
+});
+
+const BUILD_ID = new InjectionToken<string>("BUILD_ID", {
+    scope: Scope.GLOBAL,
+    defaultValue: () => crypto.randomUUID(),
+});
+
+const appName = RootInjector.get(APP_NAME);
 ```
 
 ## Function-based Injection

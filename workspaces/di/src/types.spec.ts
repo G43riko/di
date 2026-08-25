@@ -9,6 +9,7 @@ import {
     validateCustomProvider,
 } from "./types.ts";
 import { InjectionToken } from "./injection-token.ts";
+import { Scope } from "./scope.ts";
 
 class MyService {}
 class AnotherService {}
@@ -27,6 +28,14 @@ class MockInjectionToken<T = any> extends InjectionToken<T> {
 }
 describe("Types", () => {
     describe("validateCustomProvider", () => {
+        it("rejects a global injection token as a provider token", () => {
+            const token = new InjectionToken("GLOBAL", { scope: Scope.GLOBAL, defaultValue: "default" });
+
+            expect(() => validateCustomProvider({ token, useValue: "value" })).toThrow(
+                /cannot be used as a provider token/,
+            );
+        });
+
         it("throws if no provider or token", () => {
             expect(() => validateCustomProvider(undefined as any)).toThrow("Provider must have a valid token");
             expect(() => validateCustomProvider({} as any)).toThrow("Provider must have a valid token");

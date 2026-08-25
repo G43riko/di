@@ -236,6 +236,9 @@ export function validateCustomProvider(provider: CustomProvider): void {
     if (!provider || !provider.token) {
         throw new Error(`Provider must have a valid token`);
     }
+    if (provider.token instanceof InjectionToken && provider.token.options.scope === Scope.GLOBAL) {
+        throw new Error(`Global injection token '${provider.token}' cannot be used as a provider token`);
+    }
     // validate strategies
     const strategies = ["useClass", "useValue", "factory", "useExisting"] as const;
     const defined = strategies.filter((k) => k in provider);

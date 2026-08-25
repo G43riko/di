@@ -6,7 +6,6 @@ import { inject } from "./injections.ts";
 import { createInjector } from "./create-injector.ts";
 import { InjectionToken } from "./injection-token.ts";
 import { _resetConfig, _setEnableInject } from "./config.ts";
-import { isItem } from "@std/http/unstable-structured-fields";
 
 describe("inject() feature flag", () => {
     afterEach(() => _resetConfig());
@@ -20,23 +19,21 @@ describe("inject() feature flag", () => {
 
 describe("Injections", () => {
     it("Should test custom @service factory", () => {
-
         @Service({
-            factory: () => new ChildClass()
-        }) 
+            factory: () => new ChildClass(),
+        })
         class OriginalClass {
-            public readonly name: string =  "_OriginalClass"
+            public readonly name: string = "_OriginalClass";
         }
 
         class ChildClass extends OriginalClass {
-
-            public override readonly name =  "_ChildClass"
+            public override readonly name = "_ChildClass";
         }
 
         const instance = RootInjector.get(OriginalClass);
-        expect(instance).toBeInstanceOf(ChildClass)
-        expect(instance?.name).toBe("_ChildClass")
-    })
+        expect(instance).toBeInstanceOf(ChildClass);
+        expect(instance?.name).toBe("_ChildClass");
+    });
     it("should reject a non-global dependency of a Service", () => {
         @Injectable.injector()
         class LocalDependency {}

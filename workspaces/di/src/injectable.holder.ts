@@ -1,4 +1,5 @@
 import { defaultScope } from "./config.ts";
+import { InjectionToken } from "./injection-token.ts";
 import { assignProperty } from "./misc-utils.ts";
 import { Scope } from "./scope.ts";
 import { isCustomProvider, isType, type ProviderType, type Type } from "./types.ts";
@@ -42,7 +43,11 @@ export function isInjectable(inject: Type): boolean {
  * @param token - The provider type to inspect
  * @returns The scope of the provider
  */
-export function getScope(token: ProviderType): Scope {
+export function getScope(token: ProviderType | InjectionToken<any>): Scope {
+    if (token instanceof InjectionToken) {
+        return token.options.scope;
+    }
+
     if (isType(token)) {
         const holder = getSymbol(token, injectableDataSymbol);
         if (holder) {

@@ -2,7 +2,24 @@ import { describe, it } from "node:test";
 import { expect } from "@std/expect";
 import { createInjector } from "./create-injector.ts";
 import { InjectionToken } from "./injection-token.ts";
+import { Scope } from "./scope.ts";
 describe("InjectionToken", () => {
+    it("should default to injector scope", () => {
+        const TOKEN = new InjectionToken("DEFAULT_SCOPE");
+        expect(TOKEN.options.scope).toBe(Scope.INJECTOR);
+    });
+
+    it("should require a default value for global scope", () => {
+        expect(() => new InjectionToken("GLOBAL_WITHOUT_DEFAULT", { scope: Scope.GLOBAL })).toThrow(
+            /must have a defaultValue/,
+        );
+    });
+
+    it("should allow falsy default values for global scope", () => {
+        const TOKEN = new InjectionToken<number>("GLOBAL_ZERO", { scope: Scope.GLOBAL, defaultValue: 0 });
+        expect(TOKEN.options.scope).toBe(Scope.GLOBAL);
+    });
+
     it("should return undefined if token without default value is requested", () => {
         const TOKEN = new InjectionToken("TEST0");
         const injector = createInjector({ providers: [] });

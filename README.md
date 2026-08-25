@@ -62,23 +62,23 @@ A lightweight, powerful, and fully type-safe dependency injection library for De
 
 ## Features
 
-| Feature | Description |
-|---|---|
-| **`@Injectable` decorator** | Marks a class as injectable and sets its scope |
-| **Scoped decorators** | `@Injectable.global()`, `@Injectable.injector()`, `@Injectable.transient()` |
-| **`createInjector()`** | Factory to create a named injector with providers and optional parent |
-| **`InjectionToken<T>`** | Type-safe token for injecting non-class values (strings, configs, interfaces) |
-| **`inject(token)`** | Functional injection — retrieve a dependency without constructor parameters |
-| **`inject.optional(token)`** | Like `inject()` but returns `undefined` instead of throwing when not found |
-| **Multi-providers** | Collect multiple implementations under a single token as an array |
-| **Hierarchical injectors** | Child injectors inherit providers from parent; useful for feature modules |
-| **Root injector** | Singleton container that automatically resolves global providers |
-| **`resolveAll()`** | Eagerly instantiate all registered providers at once |
-| **`run()` / `runAsync()`** | Execute a callback inside an injector context so `inject()` works inside it |
-| **Circular dependency detection** | Throws a descriptive error showing the full dependency chain |
-| **Async isolation** | Each `runAsync()` call gets an isolated injector context via `AsyncLocalStorage` |
-| **Abstract class tokens** | Use an abstract class as a token and bind a concrete implementation |
-| **Debug helper** | `injector.printDebug()` prints all registered tokens and their resolution state |
+| Feature                           | Description                                                                      |
+| --------------------------------- | -------------------------------------------------------------------------------- |
+| **`@Injectable` decorator**       | Marks a class as injectable and sets its scope                                   |
+| **Scoped decorators**             | `@Injectable.global()`, `@Injectable.injector()`, `@Injectable.transient()`      |
+| **`createInjector()`**            | Factory to create a named injector with providers and optional parent            |
+| **`InjectionToken<T>`**           | Type-safe token for injecting non-class values (strings, configs, interfaces)    |
+| **`inject(token)`**               | Functional injection — retrieve a dependency without constructor parameters      |
+| **`inject.optional(token)`**      | Like `inject()` but returns `undefined` instead of throwing when not found       |
+| **Multi-providers**               | Collect multiple implementations under a single token as an array                |
+| **Hierarchical injectors**        | Child injectors inherit providers from parent; useful for feature modules        |
+| **Root injector**                 | Singleton container that automatically resolves global providers                 |
+| **`resolveAll()`**                | Eagerly instantiate all registered providers at once                             |
+| **`run()` / `runAsync()`**        | Execute a callback inside an injector context so `inject()` works inside it      |
+| **Circular dependency detection** | Throws a descriptive error showing the full dependency chain                     |
+| **Async isolation**               | Each `runAsync()` call gets an isolated injector context via `AsyncLocalStorage` |
+| **Abstract class tokens**         | Use an abstract class as a token and bind a concrete implementation              |
+| **Debug helper**                  | `injector.printDebug()` prints all registered tokens and their resolution state  |
 
 ---
 
@@ -193,24 +193,26 @@ import { Injectable, Scope } from "@g43/di";
 class MyService {}
 ```
 
-> **Note:** Classes must be annotated with `@Injectable` (or registered via a custom provider) before they can be resolved by an injector. Attempting to register an unannotated class will throw an error.
+> **Note:** Classes must be annotated with `@Injectable` (or registered via a custom provider) before they can be
+> resolved by an injector. Attempting to register an unannotated class will throw an error.
 
 ---
 
 ### Injectors
 
-An **injector** is a container that holds provider registrations and resolves dependencies on demand. Injectors are created with `createInjector()`.
+An **injector** is a container that holds provider registrations and resolves dependencies on demand. Injectors are
+created with `createInjector()`.
 
 ```ts
 import { createInjector } from "@g43/di";
 
 const injector = createInjector({
-    name: "MyInjector",          // optional — shown in debug output
+    name: "MyInjector", // optional — shown in debug output
     providers: [ServiceA, ServiceB],
     parentInjector: anotherInjector, // optional — defaults to RootInjector
-    instantiateImmediately: true,    // optional — eagerly instantiate all providers
-    ignoreDuplicates: false,         // optional — suppress duplicate registration errors
-    allowUnresolved: false,          // optional — skip unresolvable providers during eager init
+    instantiateImmediately: true, // optional — eagerly instantiate all providers
+    ignoreDuplicates: false, // optional — suppress duplicate registration errors
+    allowUnresolved: false, // optional — skip unresolvable providers during eager init
 });
 ```
 
@@ -243,7 +245,8 @@ injector.printDebug();
 
 ### InjectionToken
 
-Use `InjectionToken<T>` when you need to inject a value that doesn't have a class constructor — such as a configuration object, a primitive, or a third-party service.
+Use `InjectionToken<T>` when you need to inject a value that doesn't have a class constructor — such as a configuration
+object, a primitive, or a third-party service.
 
 ```ts
 import { InjectionToken } from "@g43/di";
@@ -302,11 +305,11 @@ const DB_URL = new InjectionToken<string>("DB_URL", {
 
 Scopes control when and how often a provider creates a new instance.
 
-| Scope | Enum value | Behaviour |
-|---|---|---|
-| `GLOBAL` | `Scope.GLOBAL` | **One instance** shared across the entire application. Stored in `RootInjector`. |
-| `INJECTOR` | `Scope.INJECTOR` | **One instance per injector** (and its children). This is the default. |
-| `TRANSIENT` | `Scope.TRANSIENT` | **New instance on every request**. Never cached. |
+| Scope       | Enum value        | Behaviour                                                                        |
+| ----------- | ----------------- | -------------------------------------------------------------------------------- |
+| `GLOBAL`    | `Scope.GLOBAL`    | **One instance** shared across the entire application. Stored in `RootInjector`. |
+| `INJECTOR`  | `Scope.INJECTOR`  | **One instance per injector** (and its children). This is the default.           |
+| `TRANSIENT` | `Scope.TRANSIENT` | **New instance on every request**. Never cached.                                 |
 
 #### Global scope example
 
@@ -362,7 +365,8 @@ injector.registerProvider({
 
 ### The `inject()` Function
 
-`inject()` lets you retrieve dependencies without constructor parameters. It must be called while an injector is active in the current context (e.g., during class instantiation or inside `injector.run()` / `injector.runAsync()`).
+`inject()` lets you retrieve dependencies without constructor parameters. It must be called while an injector is active
+in the current context (e.g., during class instantiation or inside `injector.run()` / `injector.runAsync()`).
 
 ```ts
 import { inject } from "@g43/di";
@@ -462,8 +466,7 @@ Declare dependencies using the `deps` array — the resolved instances are passe
 ```ts
 injector.registerProvider({
     token: UserRepository,
-    factory: (db: DatabaseService, logger: LoggerService) =>
-        new UserRepository(db, logger),
+    factory: (db: DatabaseService, logger: LoggerService) => new UserRepository(db, logger),
     deps: [DatabaseService, LoggerService],
 });
 ```
@@ -506,7 +509,8 @@ const validators = injector.get(VALIDATORS);
 // validators === [RequiredValidator instance, EmailValidator instance, LengthValidator instance]
 ```
 
-> **Note:** Either all registrations for a token must use `multi: true`, or none of them may. Mixing the two throws an error.
+> **Note:** Either all registrations for a token must use `multi: true`, or none of them may. Mixing the two throws an
+> error.
 
 Multi-providers also work with `useValue` and factory providers:
 
@@ -573,10 +577,12 @@ async function handleRequest(req: Request): Promise<Response> {
 
 ## Root Injector
 
-`RootInjector` is the top-level singleton container. It is the default parent for every injector created by `createInjector()`.
+`RootInjector` is the top-level singleton container. It is the default parent for every injector created by
+`createInjector()`.
 
 - `GLOBAL` scope providers are automatically stored in `RootInjector`.
-- When you call `RootInjector.get(SomeGlobalClass)`, it auto-registers the class if it has `GLOBAL` scope and wasn't registered yet.
+- When you call `RootInjector.get(SomeGlobalClass)`, it auto-registers the class if it has `GLOBAL` scope and wasn't
+  registered yet.
 
 ```ts
 import { RootInjector } from "@g43/di";
@@ -592,13 +598,15 @@ RootInjector.registerProvider({ token: "API_URL", useValue: "https://api.example
 const url = RootInjector.get("API_URL");
 ```
 
-> **Warning:** The name `"RootInjector"` is reserved. Passing it as the `name` option of `createInjector()` throws an error.
+> **Warning:** The name `"RootInjector"` is reserved. Passing it as the `name` option of `createInjector()` throws an
+> error.
 
 ---
 
 ## Abstract Classes as Tokens
 
-Abstract classes can be used as provider tokens with all four provider strategies. This is useful for programming to interfaces:
+Abstract classes can be used as provider tokens with all four provider strategies. This is useful for programming to
+interfaces:
 
 ```ts
 abstract class BaseLogger {
@@ -661,7 +669,8 @@ RootInjector.get(ServiceA);
 
 ## Async Context Support
 
-`inject()` is backed by `AsyncLocalStorage`, so each concurrent async execution context maintains its own injector reference. This means you can safely run multiple async operations with different injectors at the same time:
+`inject()` is backed by `AsyncLocalStorage`, so each concurrent async execution context maintains its own injector
+reference. This means you can safely run multiple async operations with different injectors at the same time:
 
 ```ts
 const injector1 = createInjector({ providers: [{ token: "T", useValue: "V1" }] });
@@ -698,14 +707,14 @@ injector.run(() => {
 
 Creates a new dependency injection container.
 
-| Option | Type | Default | Description |
-|---|---|---|---|
-| `providers` | `ProviderType[]` | `[]` | Providers to register immediately |
-| `name` | `string` | — | Human-readable name for debug output |
-| `parentInjector` | `Injector` | `RootInjector` | Parent injector for hierarchical lookup |
-| `instantiateImmediately` | `boolean` | `false` | Eagerly resolve all providers after creation |
-| `ignoreDuplicates` | `boolean` | `false` | Silently skip duplicate registrations |
-| `allowUnresolved` | `boolean` | `false` | Skip unresolvable providers during eager init |
+| Option                   | Type             | Default        | Description                                   |
+| ------------------------ | ---------------- | -------------- | --------------------------------------------- |
+| `providers`              | `ProviderType[]` | `[]`           | Providers to register immediately             |
+| `name`                   | `string`         | —              | Human-readable name for debug output          |
+| `parentInjector`         | `Injector`       | `RootInjector` | Parent injector for hierarchical lookup       |
+| `instantiateImmediately` | `boolean`        | `false`        | Eagerly resolve all providers after creation  |
+| `ignoreDuplicates`       | `boolean`        | `false`        | Silently skip duplicate registrations         |
+| `allowUnresolved`        | `boolean`        | `false`        | Skip unresolvable providers during eager init |
 
 Returns: `SimpleInjector`
 
@@ -713,27 +722,27 @@ Returns: `SimpleInjector`
 
 ### `Injector` interface
 
-| Method | Signature | Description |
-|---|---|---|
-| `get` | `get<T>(token): T \| undefined` | Resolve a token; returns `undefined` if not found |
-| `require` | `require<T>(token): T` | Resolve a token; throws if not found |
-| `registerProvider` | `registerProvider(provider): void` | Register a provider at runtime |
-| `resolveAll` | `resolveAll(allowUnresolved?): ProviderToken[]` | Eagerly resolve all registered providers |
-| `run` | `run<T>(callback: () => T): T` | Execute a callback in this injector's context |
-| `runAsync` | `runAsync<T>(callback: () => Promise<T>): Promise<T>` | Execute an async callback in this injector's context |
-| `printDebug` | `printDebug(): void` | Print all registered tokens and their state to the console |
+| Method             | Signature                                             | Description                                                |
+| ------------------ | ----------------------------------------------------- | ---------------------------------------------------------- |
+| `get`              | `get<T>(token): T \| undefined`                       | Resolve a token; returns `undefined` if not found          |
+| `require`          | `require<T>(token): T`                                | Resolve a token; throws if not found                       |
+| `registerProvider` | `registerProvider(provider): void`                    | Register a provider at runtime                             |
+| `resolveAll`       | `resolveAll(allowUnresolved?): ProviderToken[]`       | Eagerly resolve all registered providers                   |
+| `run`              | `run<T>(callback: () => T): T`                        | Execute a callback in this injector's context              |
+| `runAsync`         | `runAsync<T>(callback: () => Promise<T>): Promise<T>` | Execute an async callback in this injector's context       |
+| `printDebug`       | `printDebug(): void`                                  | Print all registered tokens and their state to the console |
 
 ---
 
 ### `Injectable`
 
-| Usage | Scope |
-|---|---|
-| `@Injectable()` | `GLOBAL` (default) |
-| `@Injectable({ scope: Scope.INJECTOR })` | `INJECTOR` |
-| `@Injectable.global()` | `GLOBAL` |
-| `@Injectable.injector()` | `INJECTOR` |
-| `@Injectable.transient()` | `TRANSIENT` |
+| Usage                                    | Scope              |
+| ---------------------------------------- | ------------------ |
+| `@Injectable()`                          | `GLOBAL` (default) |
+| `@Injectable({ scope: Scope.INJECTOR })` | `INJECTOR`         |
+| `@Injectable.global()`                   | `GLOBAL`           |
+| `@Injectable.injector()`                 | `INJECTOR`         |
+| `@Injectable.transient()`                | `TRANSIENT`        |
 
 ---
 
@@ -743,10 +752,10 @@ Returns: `SimpleInjector`
 const TOKEN = new InjectionToken<T>(name, options?)
 ```
 
-| Option | Type | Description |
-|---|---|---|
+| Option         | Type             | Description                                                  |
+| -------------- | ---------------- | ------------------------------------------------------------ |
 | `defaultValue` | `T \| (() => T)` | Value (or factory) returned when the token is not registered |
-| `required` | `boolean` | If `true`, `RootInjector.get(token)` throws when not found |
+| `required`     | `boolean`        | If `true`, `RootInjector.get(token)` throws when not found   |
 
 ---
 
@@ -755,8 +764,8 @@ const TOKEN = new InjectionToken<T>(name, options?)
 Retrieves a dependency from the active injector. Must be called inside an injector context.
 
 ```ts
-const value = inject<T>(token);            // throws if not found
-const value = inject.optional<T>(token);   // returns undefined if not found
+const value = inject<T>(token); // throws if not found
+const value = inject.optional<T>(token); // returns undefined if not found
 ```
 
 ---
@@ -765,8 +774,8 @@ const value = inject.optional<T>(token);   // returns undefined if not found
 
 ```ts
 enum Scope {
-    GLOBAL    = "global",    // One instance per application
-    INJECTOR  = "injector",  // One instance per injector (default)
+    GLOBAL = "global", // One instance per application
+    INJECTOR = "injector", // One instance per injector (default)
     TRANSIENT = "transient", // New instance on every request
 }
 ```
@@ -824,17 +833,17 @@ enum Scope {
 
 ## Error Reference
 
-| Error message | Cause |
-|---|---|
-| `Class 'X' must be annotated with @Injectable decorator` | Registering a class that has no `@Injectable` (when provider validation is enabled) |
-| `Cannot register provider 'X' multiple times` | Registering the same token twice without `multi: true` |
-| `Cannot find X` | `injector.require(token)` when the token is not registered |
-| `Circular dependency detected: A -> B -> A` | A dependency chain that refers back to itself |
-| `Failed to resolve parameter at index N: X` | A constructor parameter or factory dep could not be resolved |
-| `It is not in injection context` | `inject()` called outside an active injector context |
-| `Provider must have exactly one strategy among: useClass, useValue, factory, useExisting` | A custom provider object is missing (or has multiple) strategy keys |
-| `'X' cannot alias to itself` | A `useExisting` provider points to its own token |
-| `Injector name 'RootInjector' is reserved` | Passing `"RootInjector"` as the `name` to `createInjector()` |
+| Error message                                                                             | Cause                                                                               |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `Class 'X' must be annotated with @Injectable decorator`                                  | Registering a class that has no `@Injectable` (when provider validation is enabled) |
+| `Cannot register provider 'X' multiple times`                                             | Registering the same token twice without `multi: true`                              |
+| `Cannot find X`                                                                           | `injector.require(token)` when the token is not registered                          |
+| `Circular dependency detected: A -> B -> A`                                               | A dependency chain that refers back to itself                                       |
+| `Failed to resolve parameter at index N: X`                                               | A constructor parameter or factory dep could not be resolved                        |
+| `It is not in injection context`                                                          | `inject()` called outside an active injector context                                |
+| `Provider must have exactly one strategy among: useClass, useValue, factory, useExisting` | A custom provider object is missing (or has multiple) strategy keys                 |
+| `'X' cannot alias to itself`                                                              | A `useExisting` provider points to its own token                                    |
+| `Injector name 'RootInjector' is reserved`                                                | Passing `"RootInjector"` as the `name` to `createInjector()`                        |
 
 ---
 
@@ -870,17 +879,17 @@ deno.jsonc        Workspace configuration and task definitions
 
 All commands are run via `deno task`:
 
-| Command | Description |
-|---|---|
-| `deno task check` | Type-check, lint, and format-check the entire workspace |
-| `deno task check:fix` | Type-check, then auto-fix linting and formatting issues |
-| `deno task test` | Run all tests in parallel |
-| `deno task test:coverage` | Run tests and generate coverage data |
-| `deno task coverage` | Generate an HTML coverage report (requires `test:coverage` first) |
-| `deno task coverage:lcov` | Generate an LCOV coverage report for CI integration |
-| `deno task doc` | Generate HTML API documentation |
-| `deno task serve:doc` | Serve the generated API documentation locally |
-| `deno task serve:coverage` | Serve the generated coverage report locally |
+| Command                    | Description                                                       |
+| -------------------------- | ----------------------------------------------------------------- |
+| `deno task check`          | Type-check, lint, and format-check the entire workspace           |
+| `deno task check:fix`      | Type-check, then auto-fix linting and formatting issues           |
+| `deno task test`           | Run all tests in parallel                                         |
+| `deno task test:coverage`  | Run tests and generate coverage data                              |
+| `deno task coverage`       | Generate an HTML coverage report (requires `test:coverage` first) |
+| `deno task coverage:lcov`  | Generate an LCOV coverage report for CI integration               |
+| `deno task doc`            | Generate HTML API documentation                                   |
+| `deno task serve:doc`      | Serve the generated API documentation locally                     |
+| `deno task serve:coverage` | Serve the generated coverage report locally                       |
 
 ---
 
